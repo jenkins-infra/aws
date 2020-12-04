@@ -1,0 +1,62 @@
+def terraformTemplate = """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: terraform
+    image: hashicorp/terraform:0.13.5
+    command:
+    - sleep
+    args:
+    - infinity
+    volumeMounts:
+      - name: workspace-volume
+        mountPath: /home/jenkins/agent
+    workingDir: "/home/jenkins/agent"
+  volumes:
+      - name: "workspace-volume"
+        persistentVolumeClaim:
+          claimName: "jenkins-worker-pvc"
+          readOnly: false
+"""
+
+pipeline {
+    agent none
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+    }
+
+    environment {
+        LANG = 'en_US.UTF-8'
+        LC_CTYPE = 'en_US.UTF-8'
+        /* These environment variables make it feasible for Git to clone properly while
+         * inside the wacky confines of a Docker container
+         */
+        GIT_COMMITTER_EMAIL = 'git@example.com'
+        GIT_COMMITTER_NAME = 'Git'
+        GIT_AUTHOR_NAME = 'Git'
+        GIT_AUTHOR_EMAIL = 'git@example.com'
+    }
+
+    stages {
+      stage('Terraform Validate') {
+        kubernetes {
+          yaml terraformTemplate
+          defaultContainer 'terraform'
+        }
+        steps {
+          sh 'make prepare'
+        }
+      }
+      //stage('Terraform Sec') {
+      //  agent { label 'tfsec' }
+      //    steps {
+      //      sh 'make sec'
+      //    }
+      //  }
+      //}
+    }
+}

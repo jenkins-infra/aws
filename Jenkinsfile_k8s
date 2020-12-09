@@ -48,6 +48,8 @@ pipeline {
             sh 'terraform validate'
           }
           sh 'curl --silent --location --show-error --output tfsec https://github.com/tfsec/tfsec/releases/download/v0.36.9/tfsec-linux-amd64'
+          sh 'chmod a+x tfsec'
+          sh './tfsec'
         }
       }
     }

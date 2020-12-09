@@ -49,6 +49,9 @@ pipeline {
             sh 'terraform init'
             sh 'terraform validate'
           }
+          container('tfsec') {
+            sh 'tfsec'
+          }
         }
       }
     }

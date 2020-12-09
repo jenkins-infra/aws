@@ -6,15 +6,13 @@ spec:
   - name: terraform
     image: hashicorp/terraform:0.13.5
     command:
-    - sleep
-    args:
-    - infinity
+    - cat
+    tty: true
   - name: tfsec
     image: liamg/tfsec:v0.36.9
     command:
-    - sleep
-    args:
-    - infinity
+    - cat
+    tty: true
 """
 
 pipeline {

@@ -9,24 +9,25 @@ spec:
     - sleep
     args:
     - infinity
-    volumeMounts:
-      - name: workspace-volume
-        mountPath: /home/jenkins/agent
-    workingDir: "/home/jenkins/agent"
-  volumes:
-      - name: "workspace-volume"
-        persistentVolumeClaim:
-          claimName: "jenkins-worker-pvc"
-          readOnly: false
+  - name: tfsec
+    image: liamg/tfsec:v0.36.9
+    command:
+    - sleep
+    args:
+    - infinity
 """
 
 pipeline {
-    agent none
+    agent {
+      kubernetes {
+        yaml terraformTemplate
+      }
+    }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 30, unit: 'MINUTES')
-        timestamps()
+        //timestamps()
     }
 
     environment {
@@ -43,20 +44,11 @@ pipeline {
 
     stages {
       stage('Terraform Validate') {
-        kubernetes {
-          yaml terraformTemplate
-          defaultContainer 'terraform'
-        }
         steps {
-          sh 'make prepare'
+          container('terraform') {
+            sh 'make prepare'
+          }
         }
       }
-      //stage('Terraform Sec') {
-      //  agent { label 'tfsec' }
-      //    steps {
-      //      sh 'make sec'
-      //    }
-      //  }
-      //}
     }
 }

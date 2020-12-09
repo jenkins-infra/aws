@@ -46,7 +46,7 @@ pipeline {
       stage('Terraform Validate') {
         steps {
           container('terraform') {
-            sh 'make prepare'
+            sh 'terraform init'
           }
         }
       }

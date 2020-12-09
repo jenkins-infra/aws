@@ -47,9 +47,7 @@ pipeline {
             sh 'terraform init'
             sh 'terraform validate'
           }
-          container('tfsec') {
-            sh 'tfsec'
-          }
+          sh 'curl --silent --location --show-error -o tfsec https://github.com/tfsec/tfsec/releases/download/v0.36.9/tfsec-linux-amd64
         }
       }
     }

@@ -7,7 +7,7 @@ kind: Pod
 spec:
   containers:
   - name: terraform
-    image: jenkinsciinfra/terraform:latest
+    image: jenkinsciinfra/terraform@sha256:8b9c95c1e8206f812d6946657ef73b0210c8e4d7143b71778afd79ef31632cee # 1.1.0 tag
     command:
     - cat
     tty: true

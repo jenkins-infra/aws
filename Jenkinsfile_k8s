@@ -1,4 +1,12 @@
+
+def CREDENTIAL_BASE_ID = (env.BRANCH_NAME == 'main' ? 'production-terraform' : 'ci-terraform')
+
 pipeline {
+  triggers {
+    // Build once per day if not a Pull Request or not a tag build
+    cron(env.CHANGE_ID || env.TAG_NAME ? '' : 'H 1 * * *')
+  }
+
   agent {
     kubernetes {
       yaml """
@@ -18,18 +26,28 @@ spec:
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
-    timeout(time: 30, unit: 'MINUTES')
+    timeout(time: 2, unit: 'HOURS')
+  }
+
+  environment {
+    AWS_ACCESS_KEY_ID = credentials("${CREDENTIAL_BASE_ID}-access-key")
+    AWS_SECRET_ACCESS_KEY = credentials("${CREDENTIAL_BASE_ID}-secret-key")
   }
 
   stages {
-    stage('Prepare Terraform Environment') {
+    stage('🧹 Prepare Terraform Environment') {
       steps {
         sh 'make prepare'
       }
     }
-    stage('Validate Terraform Project') {
+    stage('🔎 Validate Terraform Project') {
       steps {
         sh 'make validate'
+      }
+    }
+    stage('✅ Test Terraform Project') {
+      steps {
+        sh 'make tests'
       }
     }
   }

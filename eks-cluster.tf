@@ -6,9 +6,9 @@ module "eks" {
   subnets         = module.vpc.private_subnets
 
   tags = {
-    Environment = "training"
-    GithubRepo  = "terraform-aws-eks"
-    GithubOrg   = "terraform-aws-modules"
+    Environment = "jenkins-infra-${terraform.workspace}"
+    GithubRepo  = "aws"
+    GithubOrg   = "jenkins-infra"
   }
 
   vpc_id = module.vpc.vpc_id
@@ -29,6 +29,11 @@ module "eks" {
       asg_desired_capacity          = 1
     },
   ]
+
+  # This block is a temporary fix for https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1205
+  workers_group_defaults = {
+  	root_volume_type = "gp2"
+  }
 }
 
 data "aws_eks_cluster" "cluster" {

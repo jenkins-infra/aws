@@ -43,6 +43,6 @@ func TestTerraformEksCluster(t *testing.T) {
 	// Switch to a new temporary workspace
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workpaceName)
 
-	// Run "terraform init" and "terraform apply". Fail the test if there are any errors.
+	// Run "terraform init" and "terraform plan". Fail the test if there are any errors.
 	terraform.InitAndPlan(t, terraformOptions)
 }

@@ -1,5 +1,10 @@
 
-def CREDENTIAL_BASE_ID = (env.BRANCH_NAME == 'main' ? 'production-terraform' : 'ci-terraform')
+// The production credentials are only used on the main branch, when the build is triggered by code push or a human
+// On branches, PR, or the daily rebuild, then tests are run, no deployment are executed, and the "non production" credentials are used
+def CREDENTIAL_BASE_ID = 'ci-terraform'
+if (env.BRANCH_NAME == 'main' && currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')) {
+  CREDENTIAL_BASE_ID = 'production-terraform'
+}
 
 pipeline {
   triggers {
@@ -46,6 +51,12 @@ spec:
       }
     }
     stage('✅ Test Terraform Project') {
+      when {
+        // Do not run tests with the production credentials to avoid polluting production Terraform workspaces
+        expression {
+          return CREDENTIAL_BASE_ID != 'production-terraform'
+        }
+      }
       steps {
         sh 'make tests'
       }

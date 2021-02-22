@@ -9,7 +9,7 @@ if (env.BRANCH_NAME == 'main' && !currentBuild.getBuildCauses('hudson.triggers.T
 pipeline {
   triggers {
     // Build once per day if not a Pull Request or not a tag build
-    cron(env.CHANGE_ID || env.TAG_NAME ? '' : 'H 1 * * *')
+    cron(env.CHANGE_ID || env.TAG_NAME ? '' : '@daily')
   }
 
   agent {

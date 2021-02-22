@@ -2,7 +2,7 @@
 // The production credentials are only used on the main branch, when the build is triggered by code push or a human
 // On branches, PR, or the daily rebuild, then tests are run, no deployment are executed, and the "non production" credentials are used
 def CREDENTIAL_BASE_ID = 'ci-terraform'
-if (env.BRANCH_NAME == 'main' && currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')) {
+if (env.BRANCH_NAME == 'main' && !currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')) {
   CREDENTIAL_BASE_ID = 'production-terraform'
 }
 

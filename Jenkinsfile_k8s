@@ -1,4 +1,17 @@
+
+// The production credentials are only used on the main branch, when the build is triggered by code push or a human
+// On branches, PR, or the daily rebuild, then tests are run, no deployment are executed, and the "non production" credentials are used
+def CREDENTIAL_BASE_ID = 'ci-terraform'
+if (env.BRANCH_NAME == 'main' && !currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')) {
+  CREDENTIAL_BASE_ID = 'production-terraform'
+}
+
 pipeline {
+  triggers {
+    // Build once per day if not a Pull Request or not a tag build
+    cron(env.CHANGE_ID || env.TAG_NAME ? '' : '@daily')
+  }
+
   agent {
     kubernetes {
       yaml """
@@ -18,18 +31,34 @@ spec:
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
-    timeout(time: 30, unit: 'MINUTES')
+    timeout(time: 2, unit: 'HOURS')
+  }
+
+  environment {
+    AWS_ACCESS_KEY_ID = credentials("${CREDENTIAL_BASE_ID}-access-key")
+    AWS_SECRET_ACCESS_KEY = credentials("${CREDENTIAL_BASE_ID}-secret-key")
   }
 
   stages {
-    stage('Prepare Terraform Environment') {
+    stage('🧹 Prepare Terraform Environment') {
       steps {
         sh 'make prepare'
       }
     }
-    stage('Validate Terraform Project') {
+    stage('🔎 Validate Terraform Project') {
       steps {
         sh 'make validate'
+      }
+    }
+    stage('✅ Test Terraform Project') {
+      when {
+        // Do not run tests with the production credentials to avoid polluting production Terraform workspaces
+        expression {
+          return CREDENTIAL_BASE_ID != 'production-terraform'
+        }
+      }
+      steps {
+        sh 'make tests'
       }
     }
   }

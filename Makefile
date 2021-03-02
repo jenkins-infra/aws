@@ -3,11 +3,13 @@
 # Ref. https://golang.org/cmd/cgo/
 export CGO_ENABLED=0
 
+BACKEND_CONFIG_FILE ?= ./backend-config
+
 help: ## Show this Makefile's help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 prepare: ## Prepare Terraform's environment by downloading and initializing its plugins and backends
-	@terraform init
+	@terraform init -backend-config=$(BACKEND_CONFIG_FILE)
 
 validate: prepare ## Run a static validation on the local files
 	@terraform validate

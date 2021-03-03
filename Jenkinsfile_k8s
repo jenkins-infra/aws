@@ -37,6 +37,11 @@ spec:
   environment {
     AWS_ACCESS_KEY_ID = credentials("${CREDENTIAL_BASE_ID}-access-key")
     AWS_SECRET_ACCESS_KEY = credentials("${CREDENTIAL_BASE_ID}-secret-key")
+    // https://www.terraform.io/docs/cli/config/environment-variables.html#tf_in_automation
+    TF_IN_AUTOMATION = '1'
+    // https://www.terraform.io/docs/cli/config/environment-variables.html#tf_input
+    TF_INPUT = '0'
+    BACKEND_CONFIG_FILE = credentials("${CREDENTIAL_BASE_ID}-backend-config")
   }
 
   stages {

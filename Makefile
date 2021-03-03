@@ -14,8 +14,8 @@ prepare: ## Prepare Terraform's environment by downloading and initializing its 
 validate: prepare ## Run a static validation on the local files
 	@terraform validate
 	@tfsec --exclude-downloaded-modules
-	## Enable test's code linting. Requires golangci-lint to be installed in the image
-	# @golangci-lint run ./tests/
+	@go fmt ./tests/
+	@golangci-lint run ./tests/
 
 tests: ## Execute the test harness
 	@go test -v -timeout 30m ./tests/

@@ -20,7 +20,7 @@ kind: Pod
 spec:
   containers:
   - name: terraform
-    image: jenkinsciinfra/terraform@sha256:8b9c95c1e8206f812d6946657ef73b0210c8e4d7143b71778afd79ef31632cee # 1.1.0 tag
+    image: jenkinsciinfra/terraform@sha256:5abf75840de08d6bbd27687ae787a02f5cce447fc3f69b5af2232deaeb5206a0 # https://github.com/jenkins-infra/docker-terraform/releases/tag/1.2.0
     command:
     - cat
     tty: true

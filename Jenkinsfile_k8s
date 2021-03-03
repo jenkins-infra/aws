@@ -31,7 +31,8 @@ spec:
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
-    timeout(time: 2, unit: 'HOURS')
+    timeout(time: 1, unit: 'HOURS')
+    disableConcurrentBuilds()
   }
 
   environment {
@@ -64,6 +65,31 @@ spec:
       }
       steps {
         sh 'make tests'
+      }
+    }
+    stage('🚀 Deploy Production') {
+      when {
+        // Only run on the main branch
+        expression {
+          return CREDENTIAL_BASE_ID == 'production-terraform'
+        }
+      }
+      stages {
+        stage('🦅 Generate Terraform Plan') {
+          steps {
+            sh 'make plan'
+          }
+        }
+        stage('🚢  Shipping Changes') {
+          // Pipeline is timeouted
+          input {
+            message "Should we apply these changes to production?"
+            ok "🚢 Yes, ship it!"
+          }
+          steps {
+            sh 'make deploy'
+          }
+        }
       }
     }
   }

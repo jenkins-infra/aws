@@ -80,15 +80,12 @@ spec:
             sh 'make plan'
           }
         }
-        stage('⏳ Wait for Human Input') {
-          agent none
+        stage('🚢  Shipping Changes') {
           // Pipeline is timeouted
           input {
             message "Should we apply these changes to production?"
             ok "🚢 Yes, ship it!"
           }
-        }
-        stage('🚢  Shipping Changes') {
           steps {
             sh 'make deploy'
           }

@@ -21,7 +21,7 @@ tests: ## Execute the test harness
 	@go test -v -timeout 30m ./tests/
 
 plan: .terraform/plugins/selections.json ## Deploy (apply) the terraform changes to production
-	@terraform plan -compact-warnings -detailed-exitcode -lock=false
+	@terraform plan -compact-warnings -lock=false
 
 deploy: .terraform/plugins/selections.json ## Deploy (apply) the terraform changes to production
 	@terraform apply -auto-approve

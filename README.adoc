@@ -1,0 +1,43 @@
+= Jenkins Infra on AWS
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:toc:
+
+This repository is meant to hold documentation, tooling and other resources
+related to the link:https://www.jenkins.io/projects/infrastructure/[Jenkins Infrastructure Project] parts hosted in
+link:https://aws.amazon.com/[Amazon Web Services (AWS)].
+
+== Requirements
+
+In order to use this repository to provision the Jenkins infrastructure on AWS, you need:
+
+* An AWS account. Please note that The Jenkins infrastructure uses 2 AWS accounts configured in infra.ci.jenkins:
+** `ci-terraform` to allow PRs and testing without impacting the production
+** `production-terraform` to apply changes to production
+* CLI tooling (Please note that infra.ci.jenkins.io uses a Docker image built from https://github.com/jenkins-infra/docker-terraform with the up-to-date requirements):
+** Terraform v0.13.x CLI to provision the infrastructure
+** GNU `make` to ease running the tasks involved in this provisionning
+** link:https://github.com/tfsec/tfsec[tfsec]
+** link:https://golang.org/[Golang] and link:https://github.com/golangci/golangci-lint[golangci-lint] to allow testing with link:https://terratest.gruntwork.io/[terratest]
+
+== HowTo
+
+=== Provision
+
+IMPORTANT: Don't blindly execute the terraform code located in this repository on your own account as it may lead your account bill to significantly increase.
+
+Once you fulfill the requirements, you can use the code located here to provision this infrastructure on your AWS account
+
+* Create a file named `backend-config`, as a "properties file format" (e.g. "key=value" per line) to configure the link:https://www.terraform.io/docs/language/settings/backends/s3.html[Terraform S3 Backend storing state]
+** This setup is automatically done by infra.ci.jenkins (`backend-config` is git-ignored)
+
+* Run `make help` to print the Makefile manual with all available targets (useful when this `README` is not synced with the `Makefile`)
+
+* Run `make prepare` to initialize the local Terraform project (e.g. generates `.terraform` and retrieve dependencies, using the S3 backend)
+
+* Run `make validate` to run a static analysis of the project (both Terraform and terratest code)
+
+* Run `make test` to execute the test harness on the project (uses the terratest code in `./tests/`)

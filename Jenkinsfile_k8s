@@ -99,9 +99,16 @@ pipeline {
               post {
                 always {
                   archiveArtifacts 'terraform-plan-for-humans.txt'
-                  script {
-                    pullRequest.comment("Terraform Plan is available at the URL ${BUILD_URL}artifact/terraform-plan-for-humans.txt")
-                  }
+                }
+              }
+            }
+            stage('🗣 Notify User on the PR ') {
+              when {
+                changeRequest()
+              }
+              steps {
+                script {
+                  pullRequest.comment("Terraform Plan is available at the URL ${BUILD_URL}artifact/terraform-plan-for-humans.txt")
                 }
               }
             }

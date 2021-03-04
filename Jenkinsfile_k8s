@@ -99,7 +99,7 @@ pipeline {
                 always {
                   archiveArtifacts 'terraform-plan-for-humans.txt'
                   script {
-                    pullRequest.comment("Terraform Plan is available at the URL ${BUILD_URL}/artifacts/terraform-plan-for-humans.txt")
+                    pullRequest.comment("Terraform Plan is available at the URL ${BUILD_URL}artifact/terraform-plan-for-humans.txt")
                   }
                 }
               }

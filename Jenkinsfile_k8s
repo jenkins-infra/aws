@@ -105,13 +105,11 @@ pipeline {
                   triggeredBy 'UserIdCause'
                 }
               }
-              // Pipeline is timeouted
-              input {
-                message "Should we apply these changes to production?"
-                ok "🚢 Yes, ship it!"
-              }
               steps {
-                echo "GO GO GO"
+                input {
+                  message "Should we apply these changes to production?"
+                  ok "🚢 Yes, ship it!"
+                }
               }
             }
             stage('🚢 Shipping Changes') {

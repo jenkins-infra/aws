@@ -107,7 +107,9 @@ pipeline {
                 changeRequest()
               }
               steps {
-                pullRequest.comment("Terraform Plan is available at the URL ${BUILD_URL}artifact/terraform-plan-for-humans.txt")
+                script {
+                  pullRequest.comment("Terraform Plan is available at the URL ${BUILD_URL}artifact/terraform-plan-for-humans.txt")
+                }
               }
             }
             stage("⏳ Waiting for User Manual Approval") {

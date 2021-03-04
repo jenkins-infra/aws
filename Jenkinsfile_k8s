@@ -106,10 +106,7 @@ pipeline {
                 }
               }
               steps {
-                input {
-                  message "Should we apply these changes to production?"
-                  ok "🚢 Yes, ship it!"
-                }
+                input message: "Should we apply these changes to production?", ok: "🚢 Yes, ship it!"
               }
             }
             stage('🚢 Shipping Changes') {

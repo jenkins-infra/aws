@@ -116,7 +116,7 @@ pipeline {
             }
             stage('🚢 Shipping Changes') {
               when {
-                allof {
+                allOf {
                   branch 'main'
                   not { triggeredBy 'TimerTrigger' }
                 }

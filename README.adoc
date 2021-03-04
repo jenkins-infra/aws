@@ -41,3 +41,15 @@ Once you fulfill the requirements, you can use the code located here to provisio
 * Run `make validate` to run a static analysis of the project (both Terraform and terratest code)
 
 * Run `make test` to execute the test harness on the project (uses the terratest code in `./tests/`)
+
+=== Pipeline's Workflows
+
+The `Jenkinsfile_k8s` pipeline describe the workflows for this GitOps system.
+
+There 4 possible workflows:
+
+* When on a Pull Request, then the tests are run on the staging environment AND a terraform plan is run on the production environment (to give the maintainer an idea of what should happen if the PR is merged)
+* When on the principal branch:
+** By default (e.g. a code push, mostly from PR merged), a terraform plan is run on the production AND a deployment is done if the plan succeeds.
+** If the trigger is the daily cron, then all tests are run on the staging AND a terraform plan is run on the production. Please note that if the plan detects changes, then it fails because a configuration drift happened.
+** If the trigger is manual, then no tests are run at all, a terraform plan is run on the production and a human must approve the pipeline for the deployment to production to happen

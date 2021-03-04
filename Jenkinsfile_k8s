@@ -1,20 +1,5 @@
 
-// The production credentials are only used on the main branch, when the build is triggered by code push or a human
-// On branches, PR, or the daily rebuild, then tests are run, no deployment are executed, and the "non production" credentials are used
-def CREDENTIAL_BASE_ID = 'ci-terraform'
-if (env.BRANCH_NAME == 'main' && !currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')) {
-  CREDENTIAL_BASE_ID = 'production-terraform'
-}
-
-pipeline {
-  triggers {
-    // Build once per day if not a Pull Request or not a tag build
-    cron(env.CHANGE_ID || env.TAG_NAME ? '' : '@daily')
-  }
-
-  agent {
-    kubernetes {
-      yaml """
+def podTemplate = """
 apiVersion: v1
 kind: Pod
 spec:
@@ -25,72 +10,119 @@ spec:
     - cat
     tty: true
 """
-      defaultContainer('terraform')
-    }
+
+pipeline {
+  triggers {
+    // Build once per day if not a Pull Request or not a tag build
+    cron(env.CHANGE_ID || env.TAG_NAME ? '' : '@daily')
   }
+
+  agent none
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
     timeout(time: 1, unit: 'HOURS')
     disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
   }
 
   environment {
-    AWS_ACCESS_KEY_ID = credentials("${CREDENTIAL_BASE_ID}-access-key")
-    AWS_SECRET_ACCESS_KEY = credentials("${CREDENTIAL_BASE_ID}-secret-key")
     // https://www.terraform.io/docs/cli/config/environment-variables.html#tf_in_automation
     TF_IN_AUTOMATION = '1'
     // https://www.terraform.io/docs/cli/config/environment-variables.html#tf_input
     TF_INPUT = '0'
-    BACKEND_CONFIG_FILE = credentials("${CREDENTIAL_BASE_ID}-backend-config")
   }
 
   stages {
-    stage('🧹 Prepare Terraform Environment') {
-      steps {
-        sh 'make prepare'
-      }
-    }
-    stage('🔎 Validate Terraform Project') {
-      steps {
-        sh 'make validate'
-      }
-    }
-    stage('✅ Test Terraform Project') {
-      when {
-        // Do not run tests with the production credentials to avoid polluting production Terraform workspaces
-        expression {
-          return CREDENTIAL_BASE_ID != 'production-terraform'
-        }
-      }
-      steps {
-        sh 'make tests'
-      }
-    }
-    stage('🚀 Deploy Production') {
-      when {
-        // Only run on the main branch
-        expression {
-          return CREDENTIAL_BASE_ID == 'production-terraform'
-        }
-      }
-      stages {
-        stage('🦅 Generate Terraform Plan') {
-          steps {
-            sh 'make plan'
+    stage('Check') {
+      parallel {
+        stage('Staging') {
+          when {
+            // The tests on staging environment runs on a PR, or on the daily cron job
+            anyOf {
+              changeRequest()
+              triggeredBy 'TimerTrigger'
+            }
+          }
+          agent {
+            kubernetes {
+              yaml podTemplate
+              defaultContainer('terraform')
+            }
+          }
+          environment {
+            AWS_ACCESS_KEY_ID = credentials("ci-terraform-access-key")
+            AWS_SECRET_ACCESS_KEY = credentials("ci-terraform-secret-key")
+            BACKEND_CONFIG_FILE = credentials("ci-terraform-backend-config")
+          }
+          stages {
+            stage('🧹 Prepare Terraform for Staging Environment') {
+              steps {
+                sh 'make prepare'
+              }
+            }
+            stage('🔎 Validate Terraform for Staging Environment') {
+              steps {
+                sh 'make validate'
+              }
+            }
+            stage('✅ Test Terraform Project') {
+              steps {
+                sh 'make tests'
+              }
+            }
           }
         }
-        stage('🚢  Shipping Changes') {
-          // Pipeline is timeouted
-          input {
-            message "Should we apply these changes to production?"
-            ok "🚢 Yes, ship it!"
+        stage('Production') {
+          agent {
+            kubernetes {
+              yaml podTemplate
+              defaultContainer('terraform')
+            }
           }
-          steps {
-            sh 'make deploy'
+          environment {
+            AWS_ACCESS_KEY_ID = credentials("production-terraform-access-key")
+            AWS_SECRET_ACCESS_KEY = credentials("production-terraform-secret-key")
+            BACKEND_CONFIG_FILE = credentials("production-terraform-backend-config")
           }
-        }
+          stages {
+            stage('🦅 Generate Terraform Plan') {
+              environment {
+                // When the job is triggered by the daily cron timer, then the plan succeed only if there is no changes found (e.g. no config drift)
+                // For all other triggers, the plan succeed either there are changes or not
+                TF_CLI_ARGS_plan="${currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? '-detailed-exitcode' : ''}"
+              }
+              steps {
+                sh 'make plan'
+              }
+            }
+            stage("⏳ Waiting for User Manual Approval") {
+              agent none
+              when {
+                // The Wait for human input is only required when a user manually launched the pipeline on the main branch
+                allOf {
+                  branch 'main'
+                  triggeredBy 'UserIdCause'
+                }
+              }
+              steps {
+                input message: "Should we apply these changes to production?", ok: "🚢 Yes, ship it!"
+              }
+            }
+            stage('🚢 Shipping Changes') {
+              when {
+                allOf {
+                  branch 'main'
+                  not { triggeredBy 'TimerTrigger' }
+                }
+              }
+              steps {
+                sh 'make deploy'
+              }
+            }
+          }
+        } // stage('Production')
       }
-    }
+    } // stage('Check')
   }
 }

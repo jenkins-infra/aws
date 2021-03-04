@@ -93,7 +93,15 @@ pipeline {
                 TF_CLI_ARGS_plan="${currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? '-detailed-exitcode' : ''}"
               }
               steps {
-                sh 'make plan'
+                sh 'make plan > terraform-plan-for-humans.txt'
+              }
+              post {
+                always {
+                  archiveArtifacts 'terraform-plan-for-humans.txt'
+                  script {
+                    pullRequest.comment("Terraform Plan is available at the URL ${BUILD_URL}/artifacts/terraform-plan-for-humans.txt")
+                  }
+                }
               }
             }
             stage("⏳ Waiting for User Manual Approval") {

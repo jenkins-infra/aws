@@ -116,11 +116,6 @@ pipeline {
                   not { triggeredBy 'TimerTrigger' }
                 }
               }
-              // Pipeline is timeouted
-              input {
-                message "Should we apply these changes to production?"
-                ok "🚢 Yes, ship it!"
-              }
               steps {
                 sh 'make deploy'
               }

@@ -2,7 +2,8 @@ module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   version         = "~> 14.0.0"
   cluster_name    = local.cluster_name
-  cluster_version = "1.17"
+  # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
+  cluster_version = "1.19"
   subnets         = module.vpc.private_subnets
 
   tags = {

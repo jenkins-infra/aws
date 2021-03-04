@@ -24,6 +24,7 @@ pipeline {
     timeout(time: 1, unit: 'HOURS')
     disableConcurrentBuilds()
     parallelsAlwaysFailFast()
+    ansiColor('xterm')
   }
 
   environment {

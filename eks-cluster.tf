@@ -35,6 +35,21 @@ module "eks" {
   workers_group_defaults = {
   	root_volume_type = "gp2"
   }
+
+  map_users = [
+    // User impersonnated when using the CloudBees IAM Accounts (e.g. humans)
+    {
+      userarn = "arn:aws:sts::200564066411:assumed-role/infra-admin/tba",
+      username = "infra-admin",
+      groups   = ["system:masters"],
+    },
+    // User defined in the Infra.CI system
+    {
+      userarn = "arn:aws:iam::200564066411:user/production-terraform",
+      username = "production-terraform",
+      groups   = ["system:masters"],
+    },
+  ]
 }
 
 data "aws_eks_cluster" "cluster" {

@@ -36,11 +36,19 @@ Once you fulfill the requirements, you can use the code located here to provisio
 
 * Run `make help` to print the Makefile manual with all available targets (useful when this `README` is not synced with the `Makefile`)
 
+* Run `make lint` to statically lint the project resources. It fails if you didn't.
+
+* Run `make lint-tests` to statically lint the test resources. It fails if you didn't.
+
 * Run `make prepare` to initialize the local Terraform project (e.g. generates `.terraform` and retrieve dependencies, using the S3 backend)
 
 * Run `make validate` to run a static analysis of the project (both Terraform and terratest code)
 
 * Run `make test` to execute the test harness on the project (uses the terratest code in `./tests/`)
+
+* Run `make plan` to prints the changes planned to be applied on the infrastructure (see this step as a "dry run" of `make deploy`)
+
+* Run `make deploy` to apply the changes to the infrastructure (implies terraform apply with no approval)
 
 === Pipeline's Workflows
 

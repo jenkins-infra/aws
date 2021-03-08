@@ -1,7 +1,7 @@
 module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "~> 14.0.0"
-  cluster_name    = local.cluster_name
+  source       = "terraform-aws-modules/eks/aws"
+  version      = "~> 14.0.0"
+  cluster_name = local.cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.19"
   subnets         = module.vpc.private_subnets
@@ -33,19 +33,19 @@ module "eks" {
 
   # This block is a temporary fix for https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1205
   workers_group_defaults = {
-  	root_volume_type = "gp2"
+    root_volume_type = "gp2"
   }
 
   map_users = [
     // User impersonnated when using the CloudBees IAM Accounts (e.g. humans)
     {
-      userarn = "arn:aws:sts::200564066411:assumed-role/infra-admin/tba",
+      userarn  = "arn:aws:sts::200564066411:assumed-role/infra-admin/tba",
       username = "infra-admin",
       groups   = ["system:masters"],
     },
     // User defined in the Infra.CI system
     {
-      userarn = "arn:aws:iam::200564066411:user/production-terraform",
+      userarn  = "arn:aws:iam::200564066411:user/production-terraform",
       username = "production-terraform",
       groups   = ["system:masters"],
     },

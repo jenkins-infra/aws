@@ -6,6 +6,9 @@ module "eks" {
   cluster_version = "1.19"
   subnets         = module.vpc.private_subnets
 
+  # Do not create a local file
+  write_kubeconfig = false
+
   tags = {
     Environment = "jenkins-infra-${terraform.workspace}"
     GithubRepo  = "aws"

@@ -52,7 +52,17 @@ module "eks" {
       username = "production-terraform",
       groups   = ["system:masters"],
     },
+    // User for administrating the charts from github.com/jenkins-infra/charts
+    {
+      userarn  = aws_iam_user.eks_charter.arn,
+      username = aws_iam_user.eks_charter.name,
+      groups   = ["system:masters"],
+    },
   ]
+}
+
+resource "aws_iam_user" "eks_charter" {
+  name = "eks_charter"
 }
 
 data "aws_eks_cluster" "cluster" {

@@ -94,7 +94,10 @@ pipeline {
                 changeRequest()
               }
               steps {
-                publishChecks name: "terraform-plan", title: "Terraform Plan for this Change Request", detailsURL: "${env.BUILD_URL}artifact/terraform-plan-for-humans.txt"
+                publishChecks name: "terraform-plan",
+                  title: "Terraform Plan for this Change Request",
+                  text: "The terraform plan for this change request can be found at <${env.BUILD_URL}artifact/terraform-plan-for-humans.txt>.",
+                  detailsURL: "${env.BUILD_URL}artifact/terraform-plan-for-humans.txt"
               }
             }
             stage("⏳ Waiting for User Manual Approval") {

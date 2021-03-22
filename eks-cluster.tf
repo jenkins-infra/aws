@@ -3,7 +3,7 @@ module "eks" {
   version      = "~> 14.0.0"
   cluster_name = local.cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
-  cluster_version = "1.19"
+  cluster_version = var.kubernetes_version
   subnets         = module.vpc.private_subnets
 
   # Do not create a local file

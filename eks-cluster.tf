@@ -1,3 +1,8 @@
+resource "aws_kms_key" "eks" {
+  description         = "EKS Secret Encryption Key"
+  enable_key_rotation = true
+}
+
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
   version      = "~> 14.0.0"
@@ -5,6 +10,13 @@ module "eks" {
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.19"
   subnets         = module.vpc.private_subnets
+
+  cluster_encryption_config = [
+    {
+      provider_key_arn = aws_kms_key.eks.arn
+      resources        = ["secrets"]
+    }
+  ]
 
   # Do not create a local file
   write_kubeconfig = false

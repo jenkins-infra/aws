@@ -17,7 +17,6 @@ validate: lint .terraform/plugins/selections.json ## Validate the terraform file
 
 lint: ## Lint the project files
 	@terraform fmt -recursive -check
-	## TODO: add yamllint and shellcheck
 
 lint-tests: ## Lint the testings files
 	@test -z "$(go fmt -l ./tests/)"

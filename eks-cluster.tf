@@ -19,18 +19,23 @@ module "eks" {
 
   worker_groups = [
     {
-      name                          = "worker-group-1"
-      instance_type                 = "t2.small"
-      additional_userdata           = "echo foo bar"
-      asg_desired_capacity          = 2
-      additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
+      name                 = "main"
+      instance_type        = "m5a.2xlarge"
+      asg_desired_capacity = 2
+      asg_min_size         = 2
+      asg_max_size         = 5
+      public_ip            = false
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal"
+      suspended_processes  = ["AZRebalance"]
     },
     {
-      name                          = "worker-group-2"
-      instance_type                 = "t2.medium"
-      additional_userdata           = "echo foo bar"
-      additional_security_group_ids = [aws_security_group.worker_group_mgmt_two.id]
-      asg_desired_capacity          = 1
+      name                = "peak"
+      instance_type       = "m5a.2xlarge"
+      spot_price          = "0.344" # https://aws.amazon.com/ec2/pricing/on-demand/
+      asg_max_size        = 5
+      public_ip           = false
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      suspended_processes = ["AZRebalance"]
     },
   ]
 

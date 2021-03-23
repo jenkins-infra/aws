@@ -81,7 +81,7 @@ pipeline {
                 TF_CLI_ARGS_plan="${currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? '-detailed-exitcode' : ''}"
               }
               steps {
-                sh 'make plan > terraform-plan-for-humans.txt'
+                sh 'make plan'
               }
               post {
                 always {

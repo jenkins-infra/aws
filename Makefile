@@ -26,7 +26,7 @@ tests: lint-tests ## Execute the test harness
 	@go test -v -timeout 30m ./tests/
 
 plan: lint .terraform/plugins/selections.json ## Deploy (apply) the terraform changes to production
-	@terraform plan -compact-warnings -lock=false
+	@terraform plan -compact-warnings -lock=false -no-color > terraform-plan-for-humans.txt
 
 deploy: lint .terraform/plugins/selections.json ## Deploy (apply) the terraform changes to production
 	@terraform apply -auto-approve

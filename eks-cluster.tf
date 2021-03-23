@@ -66,15 +66,15 @@ module "eks" {
     },
     // User for administrating the charts from github.com/jenkins-infra/charts
     {
-      userarn  = aws_iam_user.eks_charter.arn,
-      username = aws_iam_user.eks_charter.name,
+      userarn  = data.aws_iam_user.eks_charter.arn,
+      username = data.aws_iam_user.eks_charter.user_name,
       groups   = ["system:masters"],
     },
   ]
 }
 
-resource "aws_iam_user" "eks_charter" {
-  name = "eks_charter"
+data "aws_iam_user" "eks_charter" {
+  user_name = "eks_charter"
 }
 
 data "aws_eks_cluster" "cluster" {

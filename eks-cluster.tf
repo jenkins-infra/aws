@@ -5,7 +5,7 @@ resource "aws_kms_key" "eks" {
 
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "~> 14.0.0"
+  version      = "~> 15.1"
   cluster_name = local.cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
@@ -54,7 +54,7 @@ module "eks" {
   # This block is a temporary fix for https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1205
   workers_group_defaults = {
     root_volume_type = "gp2"
-    ami_id           = data.aws_ami.eks_linux_worker.id
+    ami_id           = var.linux_worker_ami
   }
 
   map_users = [
@@ -89,15 +89,4 @@ data "aws_eks_cluster" "cluster" {
 
 data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_id
-}
-
-data "aws_ami" "eks_linux_worker" {
-  filter {
-    name   = "name"
-    values = ["amazon-eks-node-${var.kubernetes_version}-v*"]
-  }
-
-  most_recent = true
-
-  owners = ["amazon"]
 }

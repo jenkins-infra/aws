@@ -61,3 +61,17 @@ There 4 possible workflows:
 ** By default (e.g. a code push, mostly from PR merged), a terraform plan is run on the production AND a deployment is done if the plan succeeds.
 ** If the trigger is the daily cron, then all tests are run on the staging AND a terraform plan is run on the production. Please note that if the plan detects changes, then it fails because a configuration drift happened.
 ** If the trigger is manual, then no tests are run at all, a terraform plan is run on the production and a human must approve the pipeline for the deployment to production to happen
+
+== Troubleshoot
+
+== IAM: User Not Authorized
+
+Sometimes, the CI users are missing an authorization on a resource. You woudl see a message liek the following:
+
+[source]
+----
+Error: error updating tags for IAM Policy (arn:aws:iam::XXXXXXXXXXX:policy/jenkins-YYYYYYYYYY): error tagging resource (arn:aws:iam::XXXXXXXXXXX:policy/jenkins-YYYYYYYYYY): AccessDenied: User: arn:aws:iam::ZZZZZZZZZZZZZ:user/production-terraform is not authorized to perform: XXXX:Yyyyyyy on resource: policy arn:aws:iam::XXXXXXXXXXX:policy/jenkins-YYYYYYYYYY
+	status code: 403, request id: <redacted>
+----
+
+To solve this issues, you have to update the IAM policies for the technical user, found int the https://github.com/jenkins-infra/terraform-states[Terraform States (private)] repository.

@@ -3,9 +3,8 @@ kind: Pod
 spec:
   automountServiceAccountToken: false
   containers:
-  - name: terraform
-    # https://github.com/jenkins-infra/docker-terraform/releases/tag/1.3.0
-    image: jenkinsciinfra/terraform@sha256:0a7013e1db0185d87e3186843420bee2c25c103c692773244c538d81147804ec
-    command:
-    - cat
-    tty: true
+    - name: terraform
+      image: jenkinsciinfra/terraform:1.4.2
+      command:
+        - cat
+      tty: true

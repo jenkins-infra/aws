@@ -24,6 +24,18 @@ pipeline {
   stages {
     stage('Check') {
       parallel {
+        stage('UpdateCLI') {
+          steps {
+            script {
+              withCredentials([string(credentialsId: 'updatecli-github-token', variable: 'UPDATECLI_GITHUB_TOKEN')]) {
+                updatecli(action: 'diff')
+                if (env.BRANCH_NAME == 'main') {
+                  updatecli(action: 'apply', cronTriggerExpression: '@daily')
+                }
+              }
+            }
+          }
+        }
         stage('Staging') {
           when {
             // The tests on staging environment runs on a PR, or on the daily cron job

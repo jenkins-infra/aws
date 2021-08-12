@@ -23,7 +23,8 @@ func TestTerraformEksCluster(t *testing.T) {
 	if err != nil || originalWorkspace == "" {
 		originalWorkspace = "default"
 	}
-	logger.Logf(t, "Original Workspace: %s", originalWorkspace)
+
+	logger.Terratest.Logf(t, "Original Workspace: %s", originalWorkspace)
 
 	// Generate a random name for this test
 	uniqueId := random.UniqueId()

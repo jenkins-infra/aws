@@ -22,7 +22,7 @@ lint-tests: ## Lint the testings files
 	@test -z "$(go fmt -l ./tests/)"
 	@golangci-lint run ./tests/
 
-tests: lint-tests ## Execute the test harness
+tests: .terraform/plugins/selections.json lint-tests ## Execute the test harness
 	@go test -v -timeout 30m ./tests/
 
 plan: lint .terraform/plugins/selections.json ## Deploy (apply) the terraform changes to production

@@ -10,6 +10,7 @@ module "eks" {
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
   subnets         = module.vpc.private_subnets
+  enable_irsa     = true
 
   cluster_encryption_config = [
     {
@@ -31,24 +32,37 @@ module "eks" {
 
   worker_groups = [
     {
-      name                 = "main"
-      instance_type        = "m5a.2xlarge"
-      asg_desired_capacity = 2
+      name                 = "main-linux"
+      instance_type        = "t3a.2xlarge"
+      asg_desired_capacity = 3
       asg_min_size         = 2
-      asg_max_size         = 5
+      asg_max_size         = 15
       public_ip            = false
       kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal"
       suspended_processes  = ["AZRebalance"]
+      tags = [
+        {
+          "key"                 = "k8s.io/cluster-autoscaler/enabled"
+          "propagate_at_launch" = "false"
+          "value"               = "true"
+        },
+        {
+          "key"                 = "k8s.io/cluster-autoscaler/${local.cluster_name}"
+          "propagate_at_launch" = "false"
+          "value"               = "owned"
+        }
+      ]
     },
-    {
-      name                = "peak"
-      instance_type       = "m5a.2xlarge"
-      spot_price          = "0.344" # https://aws.amazon.com/ec2/pricing/on-demand/
-      asg_max_size        = 5
-      public_ip           = false
-      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-      suspended_processes = ["AZRebalance"]
-    },
+    # TODO: to be added later as the autoscaling pool for peak activity while "main-linux" pool should be almost static
+    # {
+    #   name                = "peak"
+    #   instance_type       = "t3a.2xlarge"
+    #   spot_price          = "0.300" # https://aws.amazon.com/ec2/pricing/on-demand/
+    #   asg_max_size        = 5
+    #   public_ip           = false
+    #   kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
+    #   suspended_processes = ["AZRebalance"]
+    # },
   ]
 
   # This block is a temporary fix for https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1205

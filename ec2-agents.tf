@@ -1,10 +1,3 @@
-
-
-## Load public keypars from the reference file
-# Each line is expected to holds an OpenSSH public key followed by a comment character ('#') and the name of the instance using the ec2 agents with this key
-locals {
-  ec2_agents_publickeys = compact(split("\n", file("./ec2_agents_authorized_keys")))
-}
 resource "aws_key_pair" "ec2_agents" {
   for_each   = toset(local.ec2_agents_publickeys)
   key_name   = "ec2_agents_${trimspace(element(split("#", each.key), 1))}"

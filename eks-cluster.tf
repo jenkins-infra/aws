@@ -36,7 +36,7 @@ module "eks" {
       instance_type        = "t3a.2xlarge"
       asg_desired_capacity = 3
       asg_min_size         = 2
-      asg_max_size         = 15
+      asg_max_size         = 50
       public_ip            = false
       kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal"
       suspended_processes  = ["AZRebalance"]

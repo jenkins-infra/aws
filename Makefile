@@ -27,6 +27,7 @@ tests: .terraform/plugins/selections.json lint-tests ## Execute the test harness
 
 plan: lint .terraform/plugins/selections.json ## Deploy (apply) the terraform changes to production
 	@terraform plan -compact-warnings -lock=false -no-color > terraform-plan-for-humans.txt
+	@echo "Terraform plan output can be checked under the file ./terraform-plan-for-humans.txt"
 
 deploy: lint .terraform/plugins/selections.json ## Deploy (apply) the terraform changes to production
 	@terraform apply -auto-approve

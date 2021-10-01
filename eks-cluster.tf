@@ -33,9 +33,9 @@ module "eks" {
   worker_groups = [
     {
       name                 = "main-linux"
-      instance_type        = "t3a.2xlarge"
-      asg_desired_capacity = 3
-      asg_min_size         = 2
+      instance_type        = "m5a.4xlarge"
+      asg_desired_capacity = 1 # This value will be changed extrnally by the autoscaler helm chart, so we set it to the bare minimum here.
+      asg_min_size         = 1
       asg_max_size         = 50
       public_ip            = false
       kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal"

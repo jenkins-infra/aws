@@ -78,7 +78,7 @@ module "eks" {
       username = "infra-admin",
       groups   = ["system:masters"],
     },
-    // User defined in the Infra.CI system
+    // User defined in the Infra.CI system to operate terraform
     {
       userarn  = "arn:aws:iam::200564066411:user/production-terraform",
       username = "production-terraform",

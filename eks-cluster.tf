@@ -74,7 +74,7 @@ module "eks" {
   map_users = [
     // User impersonnated when using the CloudBees IAM Accounts (e.g. humans)
     {
-      userarn  = "arn:aws:sts::200564066411:assumed-role/infra-admin/tba",
+      userarn  = "arn:aws:iam::200564066411:role/infra-admin",
       username = "infra-admin",
       groups   = ["system:masters"],
     },

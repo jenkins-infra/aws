@@ -5,9 +5,10 @@ resource "aws_security_group" "all_worker_mgmt" {
   description = "all worker management"
 
   ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
+    description = "Allow incoming SSH requests to workers from private IPs only (administration from local VPC)"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
 
     cidr_blocks = [
       "10.0.0.0/8",

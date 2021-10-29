@@ -9,7 +9,8 @@ resource "aws_iam_policy" "jenkins_ec2_agents" {
   path        = "/"
   description = "IAM Policy to allow a Jenkins Controller to start and manage EC2 agents with the 'ec2' plugin."
 
-  policy = file("./iam-policies/jenkins-ec2-agents.json")
+  ## tfsec rule AWS099 is ignored: the IAM policy cannot now the EC2 resources in advance
+  policy = file("./iam-policies/jenkins-ec2-agents.json") #tfsec:ignore:AWS099
 }
 
 resource "aws_iam_user_policy_attachment" "allow_ec2_on_infraci" {
@@ -37,7 +38,8 @@ resource "aws_iam_policy" "updatecli" {
   path        = "/"
   description = "IAM Policy to allow updatecli to update AMIs and associated AWS resources."
 
-  policy = file("./iam-policies/updatecli.json")
+  ## tfsec rule AWS099 is ignored: the IAM policy cannot now the EC2 resources in advance
+  policy = file("./iam-policies/updatecli.json") #tfsec:ignore:AWS099
 }
 
 resource "aws_iam_user_policy_attachment" "allow_updatecli_read_ec2" {
@@ -71,26 +73,37 @@ resource "aws_security_group" "ec2_agents_infraci" {
 
   ## egress for DNS, HTTP, HTTPS and SSH only
   egress {
+    description = "Allow outgoing SSH requests from agents"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
   egress {
+    description = "Allow outgoing DNS requests from agents"
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
   egress {
+    description = "Allow outgoing HTTP requests from agents"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
   egress {
+    description = "Allow outgoing HTTPS requests from agents"
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+  }
+  egress {
+    description = "Allow outgoing JNLP requests from agents"
+    from_port   = 50000
+    to_port     = 50000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
@@ -116,26 +129,37 @@ resource "aws_security_group" "ec2_agents_release" {
 
   ## egress for DNS, HTTP, HTTPS and SSH only
   egress {
+    description = "Allow outgoing SSH requests from agents"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
   egress {
+    description = "Allow outgoing DNS requests from agents"
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
   egress {
+    description = "Allow outgoing HTTP requests from agents"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
   egress {
+    description = "Allow outgoing HTTPS requests from agents"
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+  }
+  egress {
+    description = "Allow outgoing JNLP requests from agents"
+    from_port   = 50000
+    to_port     = 50000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }

@@ -1,4 +1,4 @@
-## Identity for Jenkins Controller infra.ci
+## Identity for Jenkins Controller infra.ci.jenkins.io
 data "aws_iam_user" "jenkins_infra_ci" {
   user_name = "jenkins-infra-ci"
 }
@@ -14,6 +14,16 @@ resource "aws_iam_policy" "jenkins_ec2_agents" {
 
 resource "aws_iam_user_policy_attachment" "allow_ec2_on_infraci" {
   user       = data.aws_iam_user.jenkins_infra_ci.user_name
+  policy_arn = aws_iam_policy.jenkins_ec2_agents.arn
+}
+
+## Identity for Jenkins Controller ci.jenkins.io
+data "aws_iam_user" "jenkins_ci" {
+  user_name = "jenkins-ci"
+}
+
+resource "aws_iam_user_policy_attachment" "allow_ec2_on_ci" {
+  user       = data.aws_iam_user.jenkins_ci.user_name
   policy_arn = aws_iam_policy.jenkins_ec2_agents.arn
 }
 

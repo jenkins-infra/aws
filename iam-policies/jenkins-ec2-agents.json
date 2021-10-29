@@ -5,6 +5,7 @@
             "Sid": "Stmt1312295543082",
             "Action": [
                 "ec2:DescribeSpotInstanceRequests",
+                "ec2:DescribeSpotPriceHistory",
                 "ec2:CancelSpotInstanceRequests",
                 "ec2:GetConsoleOutput",
                 "ec2:RequestSpotInstances",

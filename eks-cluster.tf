@@ -49,11 +49,12 @@ module "eks" {
     },
   ]
 
+  # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
+  # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
   worker_groups_launch_template = [
     {
       name = "spot-linux-4xlarge"
-      # Instances of 16 vCPUs /	64 Gb each. We have a list to ensure that we got the most available (e.g. the cheaper) spot
-      # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
+      # Instances of 16 vCPUs /	64 Gb each
       override_instance_types = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
       spot_instance_pools     = 6 # Amount of different instance that we can use
       asg_max_size            = 20

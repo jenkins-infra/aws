@@ -32,26 +32,6 @@ module "eks" {
 
   worker_groups = [
     {
-      name                = "main-linux"
-      instance_type       = "m5a.4xlarge"
-      asg_max_size        = 4
-      public_ip           = false
-      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=normal"
-      suspended_processes = ["AZRebalance"]
-      tags = [
-        {
-          "key"                 = "k8s.io/cluster-autoscaler/enabled"
-          "propagate_at_launch" = "false"
-          "value"               = "true"
-        },
-        {
-          "key"                 = "k8s.io/cluster-autoscaler/${local.cluster_name}"
-          "propagate_at_launch" = "false"
-          "value"               = "owned"
-        }
-      ]
-    },
-    {
       # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
       name                = "tiny-ondemand-linux"
       instance_type       = "t3a.xlarge"

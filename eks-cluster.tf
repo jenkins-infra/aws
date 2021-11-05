@@ -32,14 +32,12 @@ module "eks" {
 
   worker_groups = [
     {
-      name                 = "main-linux"
-      instance_type        = "m5a.4xlarge"
-      asg_desired_capacity = 1 # This value will be changed extrnally by the autoscaler helm chart, so we set it to the bare minimum here.
-      asg_min_size         = 1
-      asg_max_size         = 50
-      public_ip            = false
-      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal"
-      suspended_processes  = ["AZRebalance"]
+      name                = "main-linux"
+      instance_type       = "m5a.4xlarge"
+      asg_max_size        = 4
+      public_ip           = false
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=normal"
+      suspended_processes = ["AZRebalance"]
       tags = [
         {
           "key"                 = "k8s.io/cluster-autoscaler/enabled"
@@ -53,16 +51,48 @@ module "eks" {
         }
       ]
     },
-    # TODO: to be added later as the autoscaling pool for peak activity while "main-linux" pool should be almost static
-    # {
-    #   name                = "peak"
-    #   instance_type       = "t3a.2xlarge"
-    #   spot_price          = "0.300" # https://aws.amazon.com/ec2/pricing/on-demand/
-    #   asg_max_size        = 5
-    #   public_ip           = false
-    #   kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-    #   suspended_processes = ["AZRebalance"]
-    # },
+    {
+      # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
+      name                = "tiny-ondemand-linux"
+      instance_type       = "t3a.xlarge"
+      asg_max_size        = 2
+      public_ip           = false
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=normal"
+      suspended_processes = ["AZRebalance"]
+      tags = [
+        {
+          "key"                 = "k8s.io/cluster-autoscaler/enabled"
+          "propagate_at_launch" = "false"
+          "value"               = "false" # No autoscaling for these 2 machines
+        },
+      ]
+    },
+  ]
+
+  worker_groups_launch_template = [
+    {
+      name = "spot-linux-4xlarge"
+      # Instances of 16 vCPUs /	64 Gb each. We have a list to ensure that we got the most available (e.g. the cheaper) spot
+      # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
+      override_instance_types = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
+      spot_instance_pools     = 6 # Amount of different instance that we can use
+      asg_max_size            = 20
+      asg_desired_capacity    = 1
+      public_ip               = false
+      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      tags = [
+        {
+          "key"                 = "k8s.io/cluster-autoscaler/enabled"
+          "propagate_at_launch" = "false"
+          "value"               = "true"
+        },
+        {
+          "key"                 = "k8s.io/cluster-autoscaler/${local.cluster_name}"
+          "propagate_at_launch" = "false"
+          "value"               = "owned"
+        }
+      ]
+    },
   ]
 
   # This block is a temporary fix for https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1205

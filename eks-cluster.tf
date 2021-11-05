@@ -58,7 +58,6 @@ module "eks" {
       override_instance_types = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
       spot_instance_pools     = 6 # Amount of different instance that we can use
       asg_max_size            = 20
-      asg_desired_capacity    = 1
       public_ip               = false
       kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
       tags = [

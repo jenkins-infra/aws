@@ -4,7 +4,7 @@ spec:
   automountServiceAccountToken: false
   containers:
     - name: terraform
-      image: jenkinsciinfra/terraform:1.4.40
+      image: jenkinsciinfra/terraform:1.4.43
       command:
         - cat
       tty: true

@@ -75,12 +75,6 @@ module "eks" {
     },
   ]
 
-  # This block is a temporary fix for https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1205
-  workers_group_defaults = {
-    root_volume_type = "gp2"
-    ami_id           = var.linux_worker_ami
-  }
-
   map_users = [
     // User impersonnated when using the CloudBees IAM Accounts (e.g. humans)
     {

@@ -1,0 +1,32 @@
+title: Bump version of the Terraform module terraform-aws-modules/eks/aws
+sources:
+  getLatestVersion:
+    kind: githubRelease
+    spec:
+      owner: "terraform-aws-modules"
+      repository: "terraform-aws-eks"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      versionFilter:
+        ## Semver removes any 'v' prefix and get the latest version following semantic
+        kind: semver
+targets:
+  upgradeModuleVersion:
+    name: "Update the Terraform module version of terraform-aws-modules/eks/aws in eks-cluster.tf"
+    kind: file
+    sourceId: getLatestVersion
+    spec:
+      file: eks-cluster.tf
+      matchPattern: >-
+        source(.*)=(.*)"terraform-aws-modules/eks/aws"([\n])(.*)version(.*)=(.*)
+      replacePattern: >-
+        source${1}=${2}"terraform-aws-modules/eks/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
+    scm:
+      github:
+        user: "{{ .github.user }}"
+        email: "{{ .github.email }}"
+        owner: "{{ .github.owner }}"
+        repository: "{{ .github.repository }}"
+        token: "{{ requiredEnv .github.token }}"
+        username: "{{ .github.username }}"
+        branch: "{{ .github.branch }}"

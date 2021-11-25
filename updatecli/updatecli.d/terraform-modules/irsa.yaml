@@ -1,0 +1,32 @@
+title: Bump version of the Terraform module "irsa" (terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc)
+sources:
+  getLatestVersion:
+    kind: githubRelease
+    spec:
+      owner: "terraform-aws-modules"
+      repository: "terraform-aws-iam"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      versionFilter:
+        ## Semver removes any 'v' prefix and get the latest version following semantic
+        kind: semver
+targets:
+  upgradeModuleVersion:
+    name: "Update the Terraform module version of terraform-aws-modules/eks/aws in irsa.tf"
+    kind: file
+    sourceId: getLatestVersion
+    spec:
+      file: irsa.tf
+      matchPattern: >-
+        source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"([\n])(.*)version(.*)=(.*)
+      replacePattern: >-
+        source${1}=${2}"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
+    scm:
+      github:
+        user: "{{ .github.user }}"
+        email: "{{ .github.email }}"
+        owner: "{{ .github.owner }}"
+        repository: "{{ .github.repository }}"
+        token: "{{ requiredEnv .github.token }}"
+        username: "{{ .github.username }}"
+        branch: "{{ .github.branch }}"

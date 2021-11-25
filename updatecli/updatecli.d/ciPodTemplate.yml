@@ -11,19 +11,11 @@ conditions:
   isContainerTerraformDefined:
     name: "Is there a container named 'terraform' defined as the first container?"
     kind: yaml
+    disablesourceinput: true
     spec:
       file: "ci-pod-template.yml"
       key: spec.containers[0].name
       value: terraform
-    scm:
-      github:
-        user: "{{ .github.user }}"
-        email: "{{ .github.email }}"
-        owner: "{{ .github.owner }}"
-        repository: "{{ .github.repository }}"
-        token: "{{ requiredEnv .github.token }}"
-        username: "{{ .github.username }}"
-        branch: "{{ .github.branch }}"
 targets:
   updateImageOnPodTemplateForTerraform:
     name: "Update the value of the key 'image' of the first container ('terraform')"

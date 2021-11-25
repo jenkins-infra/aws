@@ -28,25 +28,6 @@ resource "aws_iam_user_policy_attachment" "allow_ec2_on_ci" {
   policy_arn = aws_iam_policy.jenkins_ec2_agents.arn
 }
 
-## Identity to allow updatecli to update AMIs and associated AWS resources
-data "aws_iam_user" "updatecli" {
-  user_name = "updatecli"
-}
-
-resource "aws_iam_policy" "updatecli" {
-  name        = "updatecli"
-  path        = "/"
-  description = "IAM Policy to allow updatecli to update AMIs and associated AWS resources."
-
-  ## tfsec rule AWS099 is ignored: the IAM policy cannot now the EC2 resources in advance
-  policy = file("./iam-policies/updatecli.json") #tfsec:ignore:AWS099
-}
-
-resource "aws_iam_user_policy_attachment" "allow_updatecli_read_ec2" {
-  user       = data.aws_iam_user.updatecli.user_name
-  policy_arn = aws_iam_policy.updatecli.arn
-}
-
 resource "aws_key_pair" "ec2_agents" {
   for_each   = toset(local.ec2_agents_publickeys)
   key_name   = "ec2_agents_${trimspace(element(split("#", each.key), 1))}"

@@ -1,0 +1,32 @@
+title: Bump version of the Terraform module terraform-aws-modules/vpc/aws
+sources:
+  getLatestVersion:
+    kind: githubRelease
+    spec:
+      owner: "terraform-aws-modules"
+      repository: "terraform-aws-vpc"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      versionFilter:
+        ## Semver removes any 'v' prefix and get the latest version following semantic
+        kind: semver
+targets:
+  upgradeModuleVersion:
+    name: "Update the Terraform module version of terraform-aws-modules/vpc/aws in vpc.tf"
+    kind: file
+    sourceId: getLatestVersion
+    spec:
+      file: vpc.tf
+      matchPattern: >-
+        source(.*)=(.*)"terraform-aws-modules/vpc/aws"([\n])(.*)version(.*)=(.*)
+      replacePattern: >-
+        source${1}=${2}"terraform-aws-modules/vpc/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
+    scm:
+      github:
+        user: "{{ .github.user }}"
+        email: "{{ .github.email }}"
+        owner: "{{ .github.owner }}"
+        repository: "{{ .github.repository }}"
+        token: "{{ requiredEnv .github.token }}"
+        username: "{{ .github.username }}"
+        branch: "{{ .github.branch }}"

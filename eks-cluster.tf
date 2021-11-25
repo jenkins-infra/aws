@@ -1,8 +1,10 @@
+# Define a KMS main key to encrypt the EKS cluster
 resource "aws_kms_key" "eks" {
   description         = "EKS Secret Encryption Key"
   enable_key_rotation = true
 }
 
+# EKS Cluster definition
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
   version      = "17.24.0"
@@ -10,7 +12,9 @@ module "eks" {
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
   subnets         = module.vpc.private_subnets
-  enable_irsa     = true
+  # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
+  # useful for autoscaler, EKS addons and any AWS APi usage
+  enable_irsa = true
 
   cluster_encryption_config = [
     {
@@ -19,7 +23,7 @@ module "eks" {
     }
   ]
 
-  # Do not create a local file
+  # Do not persist kube config to a local file (if run by a human that would break their configuration)
   write_kubeconfig = false
 
   tags = {
@@ -28,6 +32,7 @@ module "eks" {
     GithubOrg   = "jenkins-infra"
   }
 
+  # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id
 
   worker_groups = [
@@ -76,19 +81,19 @@ module "eks" {
   ]
 
   map_users = [
-    // User impersonnated when using the CloudBees IAM Accounts (e.g. humans)
+    # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
     {
       userarn  = "arn:aws:iam::200564066411:role/infra-admin",
       username = "infra-admin",
       groups   = ["system:masters"],
     },
-    // User defined in the Infra.CI system to operate terraform
+    # User defined in the Infra.CI system to operate terraform
     {
       userarn  = "arn:aws:iam::200564066411:user/production-terraform",
       username = "production-terraform",
       groups   = ["system:masters"],
     },
-    // User for administrating the charts from github.com/jenkins-infra/charts
+    # User for administrating the charts from github.com/jenkins-infra/charts
     {
       userarn  = data.aws_iam_user.eks_charter.arn,
       username = data.aws_iam_user.eks_charter.user_name,
@@ -97,14 +102,17 @@ module "eks" {
   ]
 }
 
+# Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
 data "aws_iam_user" "eks_charter" {
   user_name = "eks_charter"
 }
 
+# Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_id
 }
 
+# Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_id
 }

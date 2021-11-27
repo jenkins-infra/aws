@@ -18,7 +18,7 @@ targets:
     spec:
       file: irsa.tf
       matchPattern: >-
-        source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"([\n])(.*)version(.*)=(.*)
+        source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacePattern: >-
         source${1}=${2}"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
     scm:

@@ -18,7 +18,7 @@ targets:
     spec:
       file: vpc.tf
       matchPattern: >-
-        source(.*)=(.*)"terraform-aws-modules/vpc/aws"([\n])(.*)version(.*)=(.*)
+        source(.*)=(.*)"terraform-aws-modules/vpc/aws"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacePattern: >-
         source${1}=${2}"terraform-aws-modules/vpc/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
     scm:

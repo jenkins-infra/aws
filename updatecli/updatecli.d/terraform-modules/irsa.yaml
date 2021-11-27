@@ -16,7 +16,7 @@ targets:
     kind: file
     sourceId: getLatestVersion
     spec:
-      file: irsa.tf
+      file: eks-role-autoscaler.tf
       matchPattern: >-
         source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacePattern: >-

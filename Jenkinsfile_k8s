@@ -1,3 +1,5 @@
+@Library('pipeline-library@pull/252/head') _
+
 pipeline {
   triggers {
     // Build once per day if not a Pull Request or not a tag build

@@ -1,4 +1,5 @@
 title: Bump `hashicorp-tools` docker image of ci-pod-template.yml
+
 scms:
   default:
     kind: github
@@ -10,6 +11,7 @@ scms:
       token: "{{ requiredEnv .github.token }}"
       username: "{{ .github.username }}"
       branch: "{{ .github.branch }}"
+
 sources:
   dockerHashicorpToolsImageVersion:
     kind: githubRelease
@@ -18,6 +20,7 @@ sources:
       repository: "docker-hashicorp-tools"
       token: "{{ requiredEnv .github.token }}"
       username: "{{ .github.username }}"
+
 conditions:
   isContainerHashicorpToolsDefined:
     name: "Is there a container named 'hashicorp-tools' defined as the first container?"
@@ -26,7 +29,8 @@ conditions:
     spec:
       file: "ci-pod-template.yml"
       key: spec.containers[0].name
-      value: hashicorp-tools
+      value: jnlp
+
 targets:
   updateImageOnPodTemplateForHashicorpTools:
     name: "Update the value of the key 'image' of the first container ('hashicorp-tools')"
@@ -37,9 +41,13 @@ targets:
     spec:
       file: "ci-pod-template.yml"
       key: spec.containers[0].image
+
 pullrequests:
   default:
     kind: github
     scmID: default
     targets:
       - updateImageOnPodTemplateForHashicorpTools
+    spec:
+      labels:
+        - dependencies

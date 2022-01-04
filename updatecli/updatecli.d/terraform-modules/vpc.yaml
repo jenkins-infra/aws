@@ -35,7 +35,7 @@ targets:
         source(.*)=(.*)"terraform-aws-modules/vpc/aws"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacePattern: >-
         source${1}=${2}"terraform-aws-modules/vpc/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
-    scmId: default
+    scmID: default
 
 pullrequests:
   default:

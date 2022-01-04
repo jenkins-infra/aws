@@ -1,4 +1,4 @@
-title: Bump Terraform plugins (not modules)
+title: "Bump Terraform plugins - not modules"
 
 scms:
   default:
@@ -25,7 +25,7 @@ targets:
     sourceId: getLatestLockFileContent
     spec:
       file: ".terraform.lock.hcl"
-    scmId: default
+    scmID: default
 
 pullrequests:
   default:

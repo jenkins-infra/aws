@@ -1,5 +1,3 @@
-@Library('pipeline-library@pull/252/head') _
-
 pipeline {
   triggers {
     // Build once per day if not a Pull Request or not a tag build
@@ -48,7 +46,6 @@ pipeline {
           agent {
             kubernetes {
               yamlFile 'ci-pod-template.yml'
-              defaultContainer('terraform')
             }
           }
           environment {
@@ -78,7 +75,6 @@ pipeline {
           agent {
             kubernetes {
               yamlFile 'ci-pod-template.yml'
-              defaultContainer('terraform')
             }
           }
           environment {

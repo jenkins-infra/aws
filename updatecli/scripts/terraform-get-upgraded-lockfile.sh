@@ -27,7 +27,9 @@ temp_dir="$(mktemp -d)"
 
 command -v terraform >/dev/null 2>&1 || {
   log_message "WARNING: the command line 'terraform' could not be found. Installing it for linux/amd64..."
-  latest_terraform_version="$(curl --silent "https://api.github.com/repos/hashicorp/terraform/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')"
+  ## latest_terraform_version="$(curl --silent "https://api.github.com/repos/hashicorp/terraform/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')"
+  ## Fixing until updatecli is embedded into the image
+  latest_terraform_version=1.0.11
   curl --silent --show-error --location --output "${temp_dir}/terraform.zip" "https://releases.hashicorp.com/terraform/${latest_terraform_version}/terraform_${latest_terraform_version}_linux_amd64.zip"
   unzip "${temp_dir}/terraform.zip" -d "${temp_dir}/"
   rm -f "${temp_dir}/terraform.zip"

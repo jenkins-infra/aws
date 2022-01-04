@@ -32,7 +32,7 @@ pullrequests:
     kind: github
     scmID: default
     targets:
-      - upgradeModuleVersion
+      - upgradeActualLockFile
     spec:
       labels:
         - dependencies

@@ -83,7 +83,7 @@ resource "aws_security_group" "ec2_agents_infraci" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [
-      "52.177.88.13/32" # AKS cluster outside IP
+      "20.97.148.67/32" # temp-privatek8s AKS cluster outside IP
     ]
   }
 

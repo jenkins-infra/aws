@@ -137,7 +137,7 @@ resource "aws_security_group" "ec2_agents_infraci" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
-  
+
   tags = {
     jenkins = "infra.ci.jenkins.io"
   }

@@ -123,6 +123,20 @@ resource "aws_security_group" "ec2_agents_infraci" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }
+  egress {
+    description = "Allow outgoing WinRM HTTP requests from agents"
+    from_port   = 5985
+    to_port     = 5985
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+  }
+  egress {
+    description = "Allow outgoing WinRM HTTPS requests from agents"
+    from_port   = 5986
+    to_port     = 5986
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+  }
 
   tags = {
     jenkins = "infra.ci.jenkins.io"
@@ -176,6 +190,20 @@ resource "aws_security_group" "ec2_agents_release" {
     description = "Allow outgoing JNLP requests from agents"
     from_port   = 50000
     to_port     = 50000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+  }
+  egress {
+    description = "Allow outgoing WinRM HTTP requests from agents"
+    from_port   = 5985
+    to_port     = 5985
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+  }
+  egress {
+    description = "Allow outgoing WinRM HTTPS requests from agents"
+    from_port   = 5986
+    to_port     = 5986
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
   }

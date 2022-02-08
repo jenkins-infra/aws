@@ -52,6 +52,7 @@ pipeline {
             AWS_ACCESS_KEY_ID = credentials("ci-terraform-access-key")
             AWS_SECRET_ACCESS_KEY = credentials("ci-terraform-secret-key")
             BACKEND_CONFIG_FILE = credentials("ci-terraform-backend-config")
+            BACKEND_CONFIG_NAMESPACE = "aws-terraform.tfstate"
           }
           stages {
             stage('🧹 Prepare Terraform for Staging Environment') {
@@ -81,6 +82,7 @@ pipeline {
             AWS_ACCESS_KEY_ID = credentials("production-terraform-access-key")
             AWS_SECRET_ACCESS_KEY = credentials("production-terraform-secret-key")
             BACKEND_CONFIG_FILE = credentials("production-terraform-backend-config")
+            BACKEND_CONFIG_NAMESPACE = "aws-terraform.tfstate"
           }
           stages {
             stage('🦅 Generate Terraform Plan') {

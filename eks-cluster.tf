@@ -48,8 +48,9 @@ module "eks" {
       # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
       name                 = "tiny-ondemand-linux"
       instance_types       = ["t3a.xlarge"]
+      capacity_type        = "ON_DEMAND"
       min_size             = 1
-      max_size             = 2
+      max_size             = 2 # Allow manual scaling when running operations or upgrades
       desired_size         = 1
       public_ip            = false
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
@@ -61,7 +62,8 @@ module "eks" {
     # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
     # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
     spot_linux_4xlarge = {
-      name = "spot-linux-4xlarge"
+      name          = "spot-linux-4xlarge"
+      capacity_type = "SPOT"
       # Instances of 16 vCPUs /	64 Gb each
       instance_types      = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
       spot_instance_pools = 6 # Amount of different instance that we can use

@@ -52,7 +52,6 @@ module "eks" {
       min_size             = 1
       max_size             = 2 # Allow manual scaling when running operations or upgrades
       desired_size         = 1
-      public_ip            = false
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
       suspended_processes  = ["AZRebalance"]
       tags = {
@@ -70,7 +69,6 @@ module "eks" {
       min_size            = 1
       max_size            = 50
       desired_size        = 1
-      public_ip           = false
       kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
       tags = {
         "k8s.io/cluster-autoscaler/enabled"               = true,

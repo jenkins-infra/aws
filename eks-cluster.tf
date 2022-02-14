@@ -32,6 +32,7 @@ module "eks" {
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id
 
+  ## Manage EKS addons with module
   cluster_addons = {
     coredns = {
       resolve_conflicts = "OVERWRITE"
@@ -73,6 +74,37 @@ module "eks" {
         "k8s.io/cluster-autoscaler/enabled"               = true,
         "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",
       }
+    },
+  }
+
+  # Allow egress from nodes (and pods...)
+  node_security_group_additional_rules = {
+    egress_jenkins_jnlp = {
+      description      = "Allow egress to Jenkins TCP"
+      protocol         = "TCP"
+      from_port        = 50000
+      to_port          = 50000
+      type             = "egress"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+    },
+    egress_http = {
+      description      = "Allow egress to plain HTTP"
+      protocol         = "TCP"
+      from_port        = 80
+      to_port          = 80
+      type             = "egress"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+    },
+    egress_https = {
+      description      = "Allow egress to HTTPS"
+      protocol         = "TCP"
+      from_port        = 443
+      to_port          = 443
+      type             = "egress"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
     },
   }
 }

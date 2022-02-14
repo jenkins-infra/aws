@@ -32,11 +32,21 @@ module "eks" {
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id
 
-  self_managed_node_groups = {
+  cluster_addons = {
+    coredns = {
+      resolve_conflicts = "OVERWRITE"
+    }
+    kube-proxy = {}
+    vpc-cni = {
+      resolve_conflicts = "OVERWRITE"
+    }
+  }
+
+  eks_managed_node_groups = {
     tiny_ondemand_linux = {
       # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
       name                 = "tiny-ondemand-linux"
-      instance_type        = "t3a.xlarge"
+      instance_types       = ["t3a.xlarge"]
       min_size             = 1
       max_size             = 2
       desired_size         = 1
@@ -52,13 +62,13 @@ module "eks" {
     spot_linux_4xlarge = {
       name = "spot-linux-4xlarge"
       # Instances of 16 vCPUs /	64 Gb each
-      override_instance_types = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
-      spot_instance_pools     = 6 # Amount of different instance that we can use
-      min_size                = 1
-      max_size                = 50
-      desired_size            = 1
-      public_ip               = false
-      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      instance_types      = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
+      spot_instance_pools = 6 # Amount of different instance that we can use
+      min_size            = 1
+      max_size            = 50
+      desired_size        = 1
+      public_ip           = false
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
       tags = {
         "k8s.io/cluster-autoscaler/enabled"               = true,
         "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",

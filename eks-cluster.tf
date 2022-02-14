@@ -97,15 +97,6 @@ module "eks" {
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = ["::/0"]
     },
-    egress_https = {
-      description      = "Allow egress to HTTPS"
-      protocol         = "TCP"
-      from_port        = 443
-      to_port          = 443
-      type             = "egress"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = ["::/0"]
-    },
   }
 }
 

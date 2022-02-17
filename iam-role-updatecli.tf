@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "updatecli" {
     effect = "Allow"
 
     actions = [
-      "ec2:ReadTags",
+      "ec2:DescribeTags",
       "ec2:DescribeInstances",
       "ec2:DescribeRegions",
       "ec2:DescribeImages",

@@ -73,17 +73,21 @@ resource "aws_key_pair" "ec2_agents" {
   }
 }
 
-resource "aws_security_group" "ec2_agents_infraci" {
-  name        = "ec2_agents_infraci"
-  description = "Allow infra.ci to connect to EC2 agents"
+## dynamically construct aws security groups
+# as per {https://stackoverflow.com/questions/65222867/can-we-have-a-dynamic-string-input-with-as-a-variable-present-on-the-terraform-r} I use the same name in the ressource argument
+resource "aws_security_group" "ec2_agents_security" {
+  for_each = toset(local.aws_security_groups)
+
+  name        = "ec2_agents_${trimspace(element(split(":", each.key), 0))}"
+  description = "Allow ${trimspace(element(split(":", each.key), 1))} to connect to EC2 agents"
 
   ingress {
-    description = "Allow SSH from infra.ci"
+    description = "Allow SSH from ${trimspace(element(split(":", each.key), 1))}"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [
-      "20.72.105.159/32" # temp-privatek8s AKS cluster outside IP
+      "${trimspace(element(split(":", each.key), 2))}" # this AKS cluster outside IP
     ]
   }
 
@@ -139,76 +143,6 @@ resource "aws_security_group" "ec2_agents_infraci" {
   }
 
   tags = {
-    jenkins = "infra.ci.jenkins.io"
-  }
-}
-
-resource "aws_security_group" "ec2_agents_release" {
-  name        = "ec2_agents_release"
-  description = "Allow release.ci to connect to EC2 agents"
-
-  ingress {
-    description = "Allow SSH from release.ci"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [
-      "52.177.88.13/32" # AKS cluster outside IP
-    ]
-  }
-
-  ## egress for DNS, HTTP, HTTPS and SSH only
-  egress {
-    description = "Allow outgoing SSH requests from agents"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
-  }
-  egress {
-    description = "Allow outgoing DNS requests from agents"
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
-  }
-  egress {
-    description = "Allow outgoing HTTP requests from agents"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
-  }
-  egress {
-    description = "Allow outgoing HTTPS requests from agents"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
-  }
-  egress {
-    description = "Allow outgoing JNLP requests from agents"
-    from_port   = 50000
-    to_port     = 50000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
-  }
-  egress {
-    description = "Allow outgoing WinRM HTTP requests from agents"
-    from_port   = 5985
-    to_port     = 5985
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
-  }
-  egress {
-    description = "Allow outgoing WinRM HTTPS requests from agents"
-    from_port   = 5986
-    to_port     = 5986
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
-  }
-
-  tags = {
-    jenkins = "release.ci.jenkins.io"
+    jenkins = trimspace(element(split(":", each.key), 1))
   }
 }

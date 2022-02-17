@@ -14,9 +14,23 @@ resource "aws_iam_policy" "cluster_autoscaler" {
   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
 }
 
+## No restriction on te resources: either managed outside terraform, or already scoped by conditions
+#tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "cluster_autoscaler" {
   statement {
-    sid    = "clusterAutoscalerAll"
+    sid    = "ec2"
+    effect = "Allow"
+
+    actions = [
+      "ec2:DescribeLaunchTemplateVersions",
+      "ec2:DescribeInstanceTypes",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ec2AutoScaling"
     effect = "Allow"
 
     actions = [
@@ -24,12 +38,9 @@ data "aws_iam_policy_document" "cluster_autoscaler" {
       "autoscaling:DescribeAutoScalingInstances",
       "autoscaling:DescribeLaunchConfigurations",
       "autoscaling:DescribeTags",
-      "ec2:DescribeLaunchTemplateVersions",
-      "ec2:DescribeInstanceTypes",
     ]
 
-    # TODO: list all resources and remove the tfsec ignore rule
-    #tfsec:ignore:AWS099
+
     resources = ["*"]
   }
 
@@ -43,8 +54,6 @@ data "aws_iam_policy_document" "cluster_autoscaler" {
       "autoscaling:UpdateAutoScalingGroup",
     ]
 
-    # TODO: list all resources and remove the tfsec ignore rule
-    #tfsec:ignore:AWS099
     resources = ["*"]
 
     condition {

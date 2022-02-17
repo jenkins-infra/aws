@@ -12,6 +12,8 @@ resource "aws_iam_policy" "jenkins_ec2_agents" {
   policy = data.aws_iam_policy_document.jenkins_ec2_agents.json
 }
 
+## Allow wildcard for resource as the EC2 instance IDs are not known in advance
+#tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "jenkins_ec2_agents" {
   statement {
     sid    = "Stmt1312295543082"
@@ -41,8 +43,6 @@ data "aws_iam_policy_document" "jenkins_ec2_agents" {
       "ec2:GetPasswordData"
     ]
 
-    # TODO: list all resources and remove the tfsec ignore rule
-    #tfsec:ignore:AWS099
     resources = ["*"]
   }
 }
@@ -73,8 +73,9 @@ resource "aws_key_pair" "ec2_agents" {
   }
 }
 
-## dynamically construct aws security groups
-# as per {https://stackoverflow.com/questions/65222867/can-we-have-a-dynamic-string-input-with-as-a-variable-present-on-the-terraform-r} I use the same name in the ressource argument
+
+## Allow all agents to egress to the internet
+#tfsec:ignore:aws-vpc-no-public-egress-sgr
 resource "aws_security_group" "ec2_agents_security" {
   for_each = toset(local.aws_security_groups)
 
@@ -97,49 +98,49 @@ resource "aws_security_group" "ec2_agents_security" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     description = "Allow outgoing DNS requests from agents"
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     description = "Allow outgoing HTTP requests from agents"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     description = "Allow outgoing HTTPS requests from agents"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     description = "Allow outgoing JNLP requests from agents"
     from_port   = 50000
     to_port     = 50000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     description = "Allow outgoing WinRM HTTP requests from agents"
     from_port   = 5985
     to_port     = 5985
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     description = "Allow outgoing WinRM HTTPS requests from agents"
     from_port   = 5986
     to_port     = 5986
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS009
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {

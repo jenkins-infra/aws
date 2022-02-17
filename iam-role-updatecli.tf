@@ -29,8 +29,8 @@ data "aws_iam_policy_document" "updatecli" {
       "ec2:DescribeAvailabilityZones",
     ]
 
-    # TODO: list all resources and remove the tfsec ignore rule
-    #tfsec:ignore:AWS099
+    ## Allow wildcard for resource as it's used to request AMIs with their IDs unknwon in Terraform
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
   }
 }

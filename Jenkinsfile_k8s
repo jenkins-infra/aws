@@ -1,6 +1,3 @@
-@Library('pipeline-library@pull/258/head') _
-
-
 properties([
   disableConcurrentBuilds(),
   buildDiscarder(logRotator(numToKeepStr: '5')),

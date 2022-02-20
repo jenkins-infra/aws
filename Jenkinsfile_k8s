@@ -1,141 +1,34 @@
-pipeline {
-  triggers {
-    // Build once per day if not a Pull Request or not a tag build
-    cron(env.CHANGE_ID || env.TAG_NAME ? '' : '@daily')
-  }
+properties([
+  disableConcurrentBuilds(),
+  buildDiscarder(logRotator(numToKeepStr: '5')),
+])
 
-  agent none
-
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
-    timeout(time: 1, unit: 'HOURS')
-    disableConcurrentBuilds()
-    ansiColor('xterm')
-  }
-
-  environment {
-    // https://www.terraform.io/docs/cli/config/environment-variables.html#tf_in_automation
-    TF_IN_AUTOMATION = '1'
-    // https://www.terraform.io/docs/cli/config/environment-variables.html#tf_input
-    TF_INPUT = '0'
-  }
-
-  stages {
-    stage('Check') {
-      parallel {
-        stage('UpdateCLI') {
-          steps {
-            script {
-              withCredentials([string(credentialsId: 'updatecli-github-token', variable: 'UPDATECLI_GITHUB_TOKEN')]) {
-                updatecli(action: 'diff')
-                if (env.BRANCH_NAME == 'main') {
-                  updatecli(action: 'apply', cronTriggerExpression: '@daily')
-                }
-              }
-            }
-          }
-        }
-        stage('Staging') {
-          when {
-            // The tests on staging environment runs on a PR, or on the daily cron job
-            anyOf {
-              changeRequest()
-              triggeredBy 'TimerTrigger'
-            }
-          }
-          agent {
-            kubernetes {
-              yamlFile 'ci-pod-template.yml'
-            }
-          }
-          environment {
-            AWS_ACCESS_KEY_ID = credentials("ci-terraform-aws-access-key")
-            AWS_SECRET_ACCESS_KEY = credentials("ci-terraform-aws-secret-key")
-            BACKEND_CONFIG_FILE = credentials("ci-terraform-aws-backend-config")
-          }
-          stages {
-            stage('🧹 Prepare Terraform for Staging Environment') {
-              steps {
-                sh 'make prepare'
-              }
-            }
-            stage('🔎 Validate Terraform for Staging Environment') {
-              steps {
-                sh 'make validate'
-              }
-            }
-            stage('✅ Test Terraform Project') {
-              steps {
-                sh 'make tests'
-              }
-            }
-          }
-        }
-        stage('Production') {
-          agent {
-            kubernetes {
-              yamlFile 'ci-pod-template.yml'
-            }
-          }
-          environment {
-            AWS_ACCESS_KEY_ID = credentials("production-terraform-aws-access-key")
-            AWS_SECRET_ACCESS_KEY = credentials("production-terraform-aws-secret-key")
-            BACKEND_CONFIG_FILE = credentials("production-terraform-aws-backend-config")
-          }
-          stages {
-            stage('🦅 Generate Terraform Plan') {
-              environment {
-                // When the job is triggered by the daily cron timer, then the plan succeed only if there is no changes found (e.g. no config drift)
-                // For all other triggers, the plan succeed either there are changes or not
-                TF_CLI_ARGS_plan="${currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? '-detailed-exitcode' : ''}"
-              }
-              steps {
-                sh 'make plan'
-              }
-              post {
-                always {
-                  archiveArtifacts 'terraform-plan-for-humans.txt'
-                }
-              }
-            }
-            stage('🗣 Notify User on the PR ') {
-              when {
-                changeRequest()
-              }
-              steps {
-                publishChecks name: "terraform-plan",
-                  title: "Terraform Plan for this Change Request",
-                  text: "The terraform plan for this change request can be found at <${env.BUILD_URL}artifact/terraform-plan-for-humans.txt>.",
-                  detailsURL: "${env.BUILD_URL}artifact/terraform-plan-for-humans.txt"
-              }
-            }
-            stage("⏳ Waiting for User Manual Approval") {
-              agent none
-              when {
-                // The Wait for human input is only required when a user manually launched the pipeline on the main branch
-                allOf {
-                  branch 'main'
-                  triggeredBy 'UserIdCause'
-                }
-              }
-              steps {
-                input message: "Should we apply these changes to production?", ok: "🚢 Yes, ship it!"
-              }
-            }
-            stage('🚢 Shipping Changes') {
-              when {
-                allOf {
-                  branch 'main'
-                  not { triggeredBy 'TimerTrigger' }
-                }
-              }
-              steps {
-                sh 'make deploy'
-              }
-            }
-          }
-        } // stage('Production')
+parallel(
+  failFast: false,
+  'terraform': {
+    timeout(time: 1, unit: 'HOURS') {
+      ansiColor('xterm') {
+        terraform(
+          stagingCredentials: [
+            string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'ci-terraform-aws-access-key'),
+            string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'ci-terraform-aws-secret-key'),
+            file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'ci-terraform-aws-backend-config'),
+          ],
+          productionCredentials: [
+            string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),
+            string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
+            file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
+          ],
+        )
       }
-    } // stage('Check')
-  }
-}
+    }
+  },
+  'updatecli': {
+    withCredentials([string(credentialsId: 'updatecli-github-token', variable: 'UPDATECLI_GITHUB_TOKEN')]) {
+      updatecli(action: 'diff')
+      if (env.BRANCH_IS_PRIMARY) {
+        updatecli(action: 'apply', cronTriggerExpression: '@weekly')
+      }
+    }
+  },
+)

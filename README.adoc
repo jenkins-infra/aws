@@ -5,7 +5,6 @@
 
 This repository hosts the infrastructure-as-code definition for all the link:https://aws.amazon.com/[Amazon Web Services (AWS)-hosted] resources for the link:https://www.jenkins.io/projects/infrastructure/[Jenkins Infrastructure Project].
 
-
 == Requirements
 
 * An AWS account with the ability to assume the role `infra-admin` on the AWS account used for the Jenkins infrastructure
@@ -44,7 +43,6 @@ A usual change to this repository looks like the following:
 * Edit the Terraform project files
 * Run the command `make --directory=.shared-tools/terraform validate` again to ensure that your changes are OK
 * Commit, push and open a pull request to let the Jenkins pipeline run the test + plan (as per https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#jenkins-pipeline)
-
 
 == Troubleshoot
 

@@ -42,7 +42,7 @@ A usual change to this repository looks like the following:
 * Follow the <<Requirements>> steps to obtain the shared tools
 * Start by running a full `make --directory=.shared-tools/terraform validate` command to ensure that you work on a sane base (should generate a report TXT file with no changes to be applied)
 * Edit the Terraform project files
-* Run the command `make --directory=.shared-tools/terraform validate` again to ensure that your changes are ok
+* Run the command `make --directory=.shared-tools/terraform validate` again to ensure that your changes are OK
 * Commit, push and open a pull request to let the Jenkins pipeline run the test + plan (as per https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#jenkins-pipeline)
 
 

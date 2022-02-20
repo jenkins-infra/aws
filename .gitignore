@@ -32,3 +32,4 @@ override.tf.json
 backend-config
 kubeconfig*
 terraform-plan-for-humans.txt
+terraform-plan-output.txt

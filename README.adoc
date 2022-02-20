@@ -1,62 +1,50 @@
 = Jenkins Infra on AWS
-:tip-caption: :bulb:
-:note-caption: :information_source:
-:important-caption: :heavy_exclamation_mark:
-:caution-caption: :fire:
-:warning-caption: :warning:
 :toc:
 :private_repo_name: terraform-states
 :private_repo_url: https://github.com/jenkins-infra/{private_repo_name}
 
-This repository is meant to hold documentation, tooling and other resources
-related to the link:https://www.jenkins.io/projects/infrastructure/[Jenkins Infrastructure Project] parts hosted in
-link:https://aws.amazon.com/[Amazon Web Services (AWS)].
+This repository hosts the infrastructure-as-code definition for all the link:https://aws.amazon.com/[Amazon Web Services (AWS)-hosted] resources for the link:https://www.jenkins.io/projects/infrastructure/[Jenkins Infrastructure Project].
+
 
 == Requirements
 
-In order to use this repository to provision the Jenkins infrastructure on AWS, you need:
+* An AWS account with the ability to assume the role `infra-admin` on the AWS account used for the Jenkins infrastructure
+* The requirements (of the shared tools) listed at link:https://github.com/jenkins-infra/shared-tools/tree/main/terraform#requirements[shared-tools/terraform#requirements]
+* The link:https://www.terraform.io/docs/language/settings/backends/s3.html[Terraform S3 Backend Configuration] on a local file named `backend-config`:
+** The content can be retrieved from the outputs of the link:{private_repo_url}[(private) repository {private_repo_name}]
+** This file (`backend-config`) is git-ignored
 
-* An AWS account with the ability to assume the role `infra-admin` on the AWS account used for the Jenkins infrastructure.
-* The following tools (you may check the Docker image used by the CI at https://github.com/jenkins-infra/docker-terraform with the up-to-date requirements):
-** Terraform version 1.0.11 CLI to provision the infrastructure
-** GNU `make` to ease running the tasks involved in this provisioning
-** link:https://github.com/tfsec/tfsec[tfsec]
-** link:https://golang.org/[Golang] and link:https://github.com/golangci/golangci-lint[golangci-lint] to allow testing with link:https://terratest.gruntwork.io/[terratest]
+* The git command line to allow cloning the repository and its submodule link:https://github.com/jenkins-infra/shared-tools[shared-tools]
+** This repository has submodules. Once you cloned the repository, execute the following command to obtain the shared tools:
+
+[source,bash]
+----
+git submodule update --init --recursive
+----
 
 == HowTo
 
-=== Provision
-
 IMPORTANT: Don't blindly execute the terraform code located in this repository on your own account as it may lead your account bill to significantly increase.
 
-Once you've fulfilled the <<Requirements>>, you can use the code located here to provision/manage this infrastructure:
+Once you've fulfilled the <<Requirements>>, you may execute any command from https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#available-commands by adding the correct flag `--directory` pointing to `.shared-tools/terraform/`:
 
-* Configure the backend (storing the shared state for terraform) with a local file named `backend-config`
-** This file has a "properties file format" (e.g. "key=value" per line) to configure the link:https://www.terraform.io/docs/language/settings/backends/s3.html[Terraform S3 Backend storing state]
-** For the production, the content can be retrieved from the outputs of the link:{private_repo_url}[(private) repository {private_repo_name}]
-** This file (`backend-config`) is git-ignored
+[source,bash]
+----
+make --directory=.shared-tools/terraform help
+make --directory=.shared-tools/terraform lint
+# ...
+----
 
-* Use one the following make commands to execute the associated actions:
-** Run `make help` to print the Makefile manual with all available targets (useful when this `README` is not synced with the `Makefile`)
-** Run `make lint` to statically lint the project resources. It fails if you didn't.
-** Run `make lint-tests` to statically lint the test resources. It fails if you didn't.
-** Run `make prepare` to initialize the local Terraform project (e.g. generates `.terraform` and retrieve dependencies, using the S3 backend)
-** Run `make validate` to run a static analysis of the project (both Terraform and terratest code)
-** Run `make test` to execute the test harness on the project (uses the terratest code in `./tests/`)
-** Run `make plan` to prints the changes planned to be applied on the infrastructure (see this step as a "dry run" of `make deploy`)
-** Run `make deploy` to apply the changes to the infrastructure (implies terraform apply with no approval)
 
-=== Pipeline's Workflows
+A usual change to this repository looks like the following:
 
-The `Jenkinsfile_k8s` pipeline describes the workflows for this GitOps system.
+* Fork the repository and clone it locally
+* Follow the <<Requirements>> steps to obtain the shared tools
+* Start by running a full `make --directory=.shared-tools/terraform validate` command to ensure that you work on a sane base (should generate a report TXT file with no changes to be applied)
+* Edit the Terraform project files
+* Run the command `make --directory=.shared-tools/terraform validate` again to ensure that your changes are OK
+* Commit, push and open a pull request to let the Jenkins pipeline run the test + plan (as per https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#jenkins-pipeline)
 
-There 4 possible workflows:
-
-* When on a Pull Request, then the tests are run on the staging environment AND a terraform plan is run on the production environment (to give the maintainer an idea of what should happen if the PR is merged)
-* When on the principal branch:
-** By default (e.g. a code push, mostly from PR merged), a terraform plan is run on the production AND a deployment is done if the plan succeeds.
-** If the trigger is the daily cron, then all tests are run on the staging AND a terraform plan is run on the production. Please note that link:https://github.com/jenkins-infra/aws/blob/72019aa41d6dfca919522dbe58ee44aac5c661cb/Jenkinsfile_k8s#L88-L90[if the plan detects changes], then it fails because a configuration drift happened.
-** If the trigger is manual, then no tests are run at all, a terraform plan is run on the production and a human must approve the pipeline for the deployment to production to happen
 
 == Troubleshoot
 

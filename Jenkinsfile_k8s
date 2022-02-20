@@ -1,27 +1,20 @@
-properties([
-  disableConcurrentBuilds(),
-  buildDiscarder(logRotator(numToKeepStr: '5')),
-])
+@Library('pipeline-library@pull/305/head') _
 
 parallel(
   failFast: false,
   'terraform': {
-    timeout(time: 1, unit: 'HOURS') {
-      ansiColor('xterm') {
-        terraform(
-          stagingCredentials: [
-            string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'ci-terraform-aws-access-key'),
-            string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'ci-terraform-aws-secret-key'),
-            file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'ci-terraform-aws-backend-config'),
-          ],
-          productionCredentials: [
-            string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),
-            string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
-            file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
-          ],
-        )
-      }
-    }
+    terraform(
+      stagingCredentials: [
+        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'ci-terraform-aws-access-key'),
+        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'ci-terraform-aws-secret-key'),
+        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'ci-terraform-aws-backend-config'),
+      ],
+      productionCredentials: [
+        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),
+        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
+        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
+      ],
+    )
   },
   'updatecli': {
     withCredentials([string(credentialsId: 'updatecli-github-token', variable: 'UPDATECLI_GITHUB_TOKEN')]) {

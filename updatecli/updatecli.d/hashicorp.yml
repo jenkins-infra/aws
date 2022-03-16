@@ -48,3 +48,4 @@ pullrequests:
     spec:
       labels:
         - dependencies
+        - hashicorp-tools

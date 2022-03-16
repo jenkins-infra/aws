@@ -1,3 +1,5 @@
+def dockerImage = 'jenkinsciinfra/hashicorp-tools:0.4.4'
+
 parallel(
   failFast: false,
   'terraform': {
@@ -15,9 +17,9 @@ parallel(
     )
   },
   'updatecli': {
-    updatecli(action: 'diff', updatecliDockerImage: 'jenkinsciinfra/hashicorp-tools:0.4.1')
+    updatecli(action: 'diff', updatecliDockerImage: dockerImage)
     if (env.BRANCH_IS_PRIMARY) {
-      updatecli(action: 'apply', cronTriggerExpression: '@weekly', updatecliDockerImage: 'jenkinsciinfra/hashicorp-tools:0.4.1')
+      updatecli(action: 'apply', cronTriggerExpression: '@weekly', updatecliDockerImage: dockerImage)
     }
   },
 )

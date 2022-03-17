@@ -5,9 +5,9 @@ parallel(
   'terraform': {
     terraform(
       stagingCredentials: [
-        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'ci-terraform-aws-access-key'),
-        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'ci-terraform-aws-secret-key'),
-        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'ci-terraform-aws-backend-config'),
+        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'staging-terraform-aws-access-key'),
+        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'staging-terraform-aws-secret-key'),
+        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'staging-terraform-aws-backend-config'),
       ],
       productionCredentials: [
         string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),

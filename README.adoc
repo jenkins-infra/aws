@@ -34,7 +34,6 @@ make --directory=.shared-tools/terraform lint
 # ...
 ----
 
-
 A usual change to this repository looks like the following:
 
 * Fork the repository and clone it locally

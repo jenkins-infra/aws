@@ -47,7 +47,7 @@ module "eks" {
     tiny_ondemand_linux = {
       # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
       name                 = "tiny-ondemand-linux"
-      instance_types       = ["t3a.xlarge"]
+      instance_types       = ["t3a.2xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 1
       max_size             = 2 # Allow manual scaling when running operations or upgrades

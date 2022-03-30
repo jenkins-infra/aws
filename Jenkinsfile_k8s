@@ -1,4 +1,4 @@
-@Library('pipeline-library@342') _
+@Library('pipeline-library@debug-branch') _
 
 def dockerImage = 'jenkinsciinfra/hashicorp-tools:0.4.6'
 

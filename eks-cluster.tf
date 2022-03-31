@@ -45,7 +45,7 @@ module "eks" {
 
   eks_managed_node_groups = {
     tiny_ondemand_linux = {
-      # This worker pool is expected to host the "technical" services such as pods autoscaler, etc.
+      # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
       name                 = "tiny-ondemand-linux"
       instance_types       = ["t3a.2xlarge"]
       capacity_type        = "ON_DEMAND"

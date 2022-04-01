@@ -13,7 +13,7 @@ module "eks" {
   cluster_version = var.kubernetes_version
   subnet_ids      = module.vpc.private_subnets
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
-  # useful for autoscaler, EKS addons and any AWS APi usage
+  # useful for autoscaler, EKS addons and any AWS API usage
   enable_irsa = true
 
   cluster_encryption_config = [

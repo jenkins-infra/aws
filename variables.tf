@@ -6,6 +6,6 @@ variable "region" {
 
 variable "kubernetes_version" {
   type        = string
-  default     = "1.20"
+  default     = "1.21"
   description = "Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html"
 }

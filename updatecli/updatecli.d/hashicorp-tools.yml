@@ -1,4 +1,4 @@
-title: Bump Jenkinsfile_k8s for updatecli `hashicorp-tools` docker image version to lastest image release
+title: Bump Jenkinsfile_k8s for updatecli `hashicorp-tools` docker image
 
 scms:
   default:

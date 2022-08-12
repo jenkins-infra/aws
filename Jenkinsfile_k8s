@@ -1,4 +1,4 @@
-def dockerImage = 'jenkinsciinfra/hashicorp-tools:0.5.50'
+def dockerImage = 'jenkinsciinfra/hashicorp-tools:0.5.54'
 
 parallel(
   failFast: false,

@@ -5,6 +5,7 @@ locals {
 
   # EKS related
   cluster_name                             = "jenkins-infra-eks-${random_string.suffix.result}"
+  public_cluster_name                      = "jenkins-infra-public-${random_string.suffix.result}"
   k8s_autoscaler_service_account_namespace = "autoscaler"
   k8s_autoscaler_service_account_name      = "cluster-autoscaler-aws-cluster-autoscaler-chart"
 

@@ -44,11 +44,11 @@ module "eks-public" {
   }
 
   eks_managed_node_groups = {
-    arm-4c8g = {
+    arm-4c16g = {
       # This worker pool is expected to host public services such as artifact-caching-proxy, etc.
-      name                 = "arm-4c8g"
+      name                 = "arm-4c16g"
       ami_type             = "AL2_ARM_64"
-      instance_types       = ["a1.xlarge"]
+      instance_types       = ["t4g.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 1
       max_size             = 2 # Allow manual scaling when running operations or upgrades

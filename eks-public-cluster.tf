@@ -74,7 +74,7 @@ module "eks-public" {
   }
 }
 
-# Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
+# Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management
 data "aws_iam_user" "eks_public_charter" {
   user_name = "eks_charter"
 }

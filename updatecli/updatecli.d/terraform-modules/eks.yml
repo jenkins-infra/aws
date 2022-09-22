@@ -36,14 +36,14 @@ targets:
       matchPattern: >-
         source(.*)=(.*)"terraform-aws-modules/eks/aws"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacePattern: >-
-        source${1}=${2}"terraform-aws-modules/eks/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
+        source${1}=${2}"terraform-aws-modules/eks/aws"${3}${4}version${5}= "{{ source "getLatestVersion" }}"
     scmID: default
 
 pullrequests:
   default:
     kind: github
     scmID: default
-    title: Bump version of the Terraform module terraform-aws-modules/eks/aws to {{ source `getLatestVersion` }}
+    title: Bump version of the Terraform module terraform-aws-modules/eks/aws to {{ source "getLatestVersion" }}
     spec:
       labels:
         - dependencies

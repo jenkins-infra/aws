@@ -1,0 +1,57 @@
+title: Bump `aws-load-balancer-controller` version and IAM policy content
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  getLatestVersion:
+    kind: githubrelease
+    spec:
+      owner: "kubernetes-sigs"
+      repository: "aws-load-balancer-controller"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+  getLatestContent:
+    depends_on:
+      - getLatestVersion
+    kind: file
+    spec:
+      # https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.3/docs/install/iam_policy.json
+      file: 'https://raw.githubusercontent.com/jenkins-infra/aws-load-balancer-controller/{{ source "getLatestVersion" }}/docs/install/iam_policy.json'
+
+targets:
+  updateTerraformFile:
+    sourceid: "getLatestVersion"
+    name: Update aws-load-balancer-controller version in terraform file
+    kind: file
+    spec:
+      file: ./iam-role-nlb.tf
+      matchpattern: 'aws-load-balancer-controller/(.*)/docs'
+      replacepattern: 'aws-load-balancer-controller/{{ source "getLatestContent" }}/docs'
+    scmid: default
+  updateJSONFile:
+    sourceid: "getLatestContent"
+    name: Update iam-nlb-policy.json file content
+    kind: file
+    spec:
+      file: ./iam-nlb-policy.json
+    scmid: default
+
+pullrequests:
+  default:
+    kind: github
+    scmid: default
+    title: Bump `aws-load-balancer-controller` version and IAM policy content to {{ source "getLatestVersion" }}
+    spec:
+      labels:
+        - dependencies
+        - aws-load-balancer-controller

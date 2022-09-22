@@ -47,6 +47,7 @@ module "eks-public" {
     arm-4c8g = {
       # This worker pool is expected to host public services such as artifact-caching-proxy, etc.
       name                 = "arm-4c8g"
+      ami_type             = "AL2_ARM_64"
       instance_types       = ["a1.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 1

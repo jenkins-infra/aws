@@ -30,7 +30,9 @@ targets:
     kind: file
     sourceId: getLatestVersion
     spec:
-      file: eks-cluster.tf
+      files:
+        - eks-cluster.tf
+        - eks-public-cluster.tf
       matchPattern: >-
         source(.*)=(.*)"terraform-aws-modules/eks/aws"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacePattern: >-
@@ -41,8 +43,8 @@ pullrequests:
   default:
     kind: github
     scmID: default
-    targets:
-      - upgradeModuleVersion
+    title: Bump version of the Terraform module terraform-aws-modules/eks/aws to {{ source `getLatestVersion` }}
     spec:
       labels:
         - dependencies
+        - terraform-aws-eks-module

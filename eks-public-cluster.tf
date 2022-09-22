@@ -62,15 +62,6 @@ module "eks-public" {
 
   # Allow egress from nodes (and pods...)
   node_security_group_additional_rules = {
-    egress_jenkins_jnlp = {
-      description      = "Allow egress to Jenkins TCP"
-      protocol         = "TCP"
-      from_port        = 50000
-      to_port          = 50000
-      type             = "egress"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = ["::/0"]
-    },
     egress_http = {
       description      = "Allow egress to plain HTTP"
       protocol         = "TCP"
@@ -82,42 +73,6 @@ module "eks-public" {
     },
   }
 }
-
-# resource "aws_lb" "nlb_public" {
-#   name               = "nlb-public"
-#   internal           = false
-#   load_balancer_type = "network"
-#   subnets            = [for subnet in module.vpc.public_subnets : subnet.id]
-
-#   enable_deletion_protection = true
-
-#   tags = {
-#     Environment = "jenkins-infra-${terraform.workspace}"
-#     GithubRepo  = "aws"
-#     GithubOrg   = "jenkins-infra"
-#   }
-# }
-
-# resource "aws_route53_zone" "aws_jenkins_io" {
-#   name = var.domain_name
-# }
-
-# resource "aws_route53_record" "a_record" {
-#   zone_id = aws_route53_zone.aws_jenkins_io.zone_id
-#   name    = "@"
-#   type    = "A"
-#   ttl     = 60
-#   records = [nlb_public.public_ip]
-# }
-
-# # DNS record for repo.aws.jenkins.io (https://github.com/jenkins-infra/helpdesk/issues/2752)
-# resource "aws_route53_record" "cname_redirect" {
-#   zone_id = aws_route53_zone.aws_jenkins_io.zone_id
-#   name    = "repo"
-#   type    = "CNAME"
-#   ttl     = 60
-#   records = ["repo.${aws_jenkins_io.name}"]
-# }
 
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
 data "aws_iam_user" "eks_public_charter" {

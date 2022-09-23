@@ -93,7 +93,7 @@ module "eks-public" {
     # User for administrating the charts from github.com/jenkins-infra/kubernetes-management
     {
       userarn  = data.aws_iam_user.eks_public_charter.arn,
-      username = data.aws_iam_user.eks_charter.user_name,
+      username = data.aws_iam_user.eks_public_charter.user_name,
       groups   = ["system:masters"],
     },
   ]

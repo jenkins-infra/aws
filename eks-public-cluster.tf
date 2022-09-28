@@ -117,3 +117,9 @@ data "aws_eks_cluster" "public-cluster" {
 data "aws_eks_cluster_auth" "public-cluster" {
   name = module.eks-public.cluster_id
 }
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.public-cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.public-cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.public-cluster.token
+}

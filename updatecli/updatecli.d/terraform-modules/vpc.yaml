@@ -27,7 +27,7 @@ sources:
 
 targets:
   upgradeModuleVersion:
-    name: "Update the Terraform module version of terraform-aws-modules/vpc/aws in vpc.tf"
+    name: Update the Terraform module version of terraform-aws-modules/vpc/aws in vpc.tf
     kind: file
     sourceid: getLatestVersion
     spec:
@@ -42,6 +42,8 @@ pullrequests:
   default:
     kind: github
     scmid: default
+    title: Bump version of the Terraform module "vpc" to {{ source "getLatestVersion" }}
     spec:
       labels:
         - dependencies
+        - terraform-aws-vpc-module

@@ -27,7 +27,7 @@ sources:
 
 targets:
   upgradeModuleVersion:
-    name: "Update the Terraform module version of terraform-aws-modules/eks/aws in irsa.tf"
+    name: Update the Terraform module version of terraform-aws-modules/eks/aws in irsa.tf
     kind: file
     sourceid: getLatestVersion
     spec:
@@ -37,14 +37,14 @@ targets:
       matchpattern: >-
         source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacepattern: >-
-        source${1}=${2}"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
+        source${1}=${2}"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"${3}${4}version${5}= "{{ source "getLatestVersion" }}"
     scmid: default
 
 pullrequests:
   default:
     kind: github
     scmid: default
-    title: Bump version of the Terraform module "irsa" to {{ source `getLatestVersion` }}
+    title: Bump version of the Terraform module "irsa" to {{ source "getLatestVersion" }}
     spec:
       labels:
         - dependencies

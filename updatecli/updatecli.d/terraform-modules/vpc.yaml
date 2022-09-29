@@ -1,4 +1,4 @@
-title: Bump version of the Terraform module terraform-aws-modules/vpc/aws
+name: Bump version of the Terraform module terraform-aws-modules/vpc/aws
 
 scms:
   default:
@@ -14,13 +14,14 @@ scms:
 
 sources:
   getLatestVersion:
-    kind: githubRelease
+    kind: githubrelease
+    name: Retrieve the latest version
     spec:
       owner: "terraform-aws-modules"
       repository: "terraform-aws-vpc"
       token: "{{ requiredEnv .github.token }}"
       username: "{{ .github.username }}"
-      versionFilter:
+      versionfilter:
         ## Semver removes any 'v' prefix and get the latest version following semantic
         kind: semver
 
@@ -28,21 +29,19 @@ targets:
   upgradeModuleVersion:
     name: "Update the Terraform module version of terraform-aws-modules/vpc/aws in vpc.tf"
     kind: file
-    sourceId: getLatestVersion
+    sourceid: getLatestVersion
     spec:
       file: vpc.tf
-      matchPattern: >-
+      matchpattern: >-
         source(.*)=(.*)"terraform-aws-modules/vpc/aws"(\r\n|\r|\n)(.*)version(.*)=(.*)
-      replacePattern: >-
+      replacepattern: >-
         source${1}=${2}"terraform-aws-modules/vpc/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
-    scmID: default
+    scmid: default
 
 pullrequests:
   default:
     kind: github
-    scmID: default
-    targets:
-      - upgradeModuleVersion
+    scmid: default
     spec:
       labels:
         - dependencies

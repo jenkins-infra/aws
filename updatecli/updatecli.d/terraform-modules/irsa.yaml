@@ -1,4 +1,4 @@
-title: Bump version of the Terraform module "irsa" (terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc)
+name: Bump version of the Terraform module "irsa" (terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc)
 
 scms:
   default:
@@ -14,13 +14,14 @@ scms:
 
 sources:
   getLatestVersion:
-    kind: githubRelease
+    kind: githubrelease
+    name: Retrieve the latest version
     spec:
       owner: "terraform-aws-modules"
       repository: "terraform-aws-iam"
       token: "{{ requiredEnv .github.token }}"
       username: "{{ .github.username }}"
-      versionFilter:
+      versionfilter:
         ## Semver removes any 'v' prefix and get the latest version following semantic
         kind: semver
 
@@ -28,21 +29,21 @@ targets:
   upgradeModuleVersion:
     name: "Update the Terraform module version of terraform-aws-modules/eks/aws in irsa.tf"
     kind: file
-    sourceId: getLatestVersion
+    sourceid: getLatestVersion
     spec:
       files:
         - eks-role-autoscaler.tf
         - iam-role-nlb.tf
-      matchPattern: >-
+      matchpattern: >-
         source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"(\r\n|\r|\n)(.*)version(.*)=(.*)
-      replacePattern: >-
+      replacepattern: >-
         source${1}=${2}"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
-    scmID: default
+    scmid: default
 
 pullrequests:
   default:
     kind: github
-    scmID: default
+    scmid: default
     title: Bump version of the Terraform module "irsa" to {{ source `getLatestVersion` }}
     spec:
       labels:

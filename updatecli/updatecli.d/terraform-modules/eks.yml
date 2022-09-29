@@ -1,4 +1,4 @@
-title: "Bump version of the Terraform module terraform-aws-modules/eks/aws"
+name: "Bump version of the Terraform module terraform-aws-modules/eks/aws"
 
 scms:
   default:
@@ -14,13 +14,14 @@ scms:
 
 sources:
   getLatestVersion:
-    kind: githubRelease
+    kind: githubrelease
+    name: Retrieve the latest version
     spec:
       owner: "terraform-aws-modules"
       repository: "terraform-aws-eks"
       token: "{{ requiredEnv .github.token }}"
       username: "{{ .github.username }}"
-      versionFilter:
+      versionfilter:
         ## Semver removes any 'v' prefix and get the latest version following semantic
         kind: semver
 
@@ -28,21 +29,21 @@ targets:
   upgradeModuleVersion:
     name: "Update the Terraform module version of terraform-aws-modules/eks/aws in eks-cluster.tf"
     kind: file
-    sourceId: getLatestVersion
+    sourceid: getLatestVersion
     spec:
       files:
         - eks-cluster.tf
         - eks-public-cluster.tf
-      matchPattern: >-
+      matchpattern: >-
         source(.*)=(.*)"terraform-aws-modules/eks/aws"(\r\n|\r|\n)(.*)version(.*)=(.*)
-      replacePattern: >-
+      replacepattern: >-
         source${1}=${2}"terraform-aws-modules/eks/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
-    scmID: default
+    scmid: default
 
 pullrequests:
   default:
     kind: github
-    scmID: default
+    scmid: default
     title: Bump version of the Terraform module terraform-aws-modules/eks/aws to {{ source `getLatestVersion` }}
     spec:
       labels:

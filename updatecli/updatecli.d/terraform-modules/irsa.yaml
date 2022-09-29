@@ -30,7 +30,9 @@ targets:
     kind: file
     sourceId: getLatestVersion
     spec:
-      file: eks-role-autoscaler.tf
+      files:
+        - eks-role-autoscaler.tf
+        - iam-role-nlb.tf
       matchPattern: >-
         source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacePattern: >-
@@ -41,8 +43,8 @@ pullrequests:
   default:
     kind: github
     scmID: default
-    targets:
-      - upgradeModuleVersion
+    title: Bump version of the Terraform module "irsa" to {{ source `getLatestVersion` }}
     spec:
       labels:
         - dependencies
+        - terraform-aws-irsa-module

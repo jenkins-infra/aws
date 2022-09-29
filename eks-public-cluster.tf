@@ -44,11 +44,11 @@ module "eks-public" {
   }
 
   eks_managed_node_groups = {
-    arm-4c8g = {
+    arm-4c16g = {
       # This worker pool is expected to host public services such as artifact-caching-proxy, etc.
-      name                 = "arm-4c8g"
+      name                 = "arm-4c16g"
       ami_type             = "AL2_ARM_64"
-      instance_types       = ["a1.xlarge"]
+      instance_types       = ["t4g.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 1
       max_size             = 2 # Allow manual scaling when running operations or upgrades
@@ -73,6 +73,34 @@ module "eks-public" {
       ipv6_cidr_blocks = ["::/0"]
     },
   }
+
+  # aws-auth configmap
+  manage_aws_auth_configmap = true
+
+  aws_auth_users = [
+    # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
+    {
+      userarn  = "arn:aws:iam::200564066411:role/infra-admin",
+      username = "infra-admin",
+      groups   = ["system:masters"],
+    },
+    # User defined in infra.ci.jenkins.io system to operate terraform
+    {
+      userarn  = "arn:aws:iam::200564066411:user/production-terraform",
+      username = "production-terraform",
+      groups   = ["system:masters"],
+    },
+    # User for administrating the charts from github.com/jenkins-infra/kubernetes-management
+    {
+      userarn  = data.aws_iam_user.eks_public_charter.arn,
+      username = data.aws_iam_user.eks_public_charter.user_name,
+      groups   = ["system:masters"],
+    },
+  ]
+
+  aws_auth_accounts = [
+    "200564066411",
+  ]
 }
 
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management

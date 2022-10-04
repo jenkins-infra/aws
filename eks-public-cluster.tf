@@ -56,13 +56,15 @@ module "eks-public" {
       instance_types       = ["t4g.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 1
-      max_size             = 2 # Allow manual scaling when running operations or upgrades
-      desired_size         = 1
+      max_size             = 3 # Allow manual scaling when running operations or upgrades
+      desired_size         = 2
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
       suspended_processes  = ["AZRebalance"]
       tags = {
         "k8s.io/cluster-autoscaler/enabled" = false # No autoscaling for these 2 machines
       },
+      # # Add the NLB policy role (need to be created first)
+      # iam_role_additional_policies = ["arn:aws:iam::${local.aws_account_id}:policy/AWSLoadBalancerControllerIAMPolicy"]
     },
   }
 
@@ -85,13 +87,13 @@ module "eks-public" {
   aws_auth_users = [
     # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
     {
-      userarn  = "arn:aws:iam::200564066411:role/infra-admin",
+      userarn  = "arn:aws:iam::${local.aws_account_id}:role/infra-admin",
       username = "infra-admin",
       groups   = ["system:masters"],
     },
     # User defined in infra.ci.jenkins.io system to operate terraform
     {
-      userarn  = "arn:aws:iam::200564066411:user/production-terraform",
+      userarn  = "arn:aws:iam::${local.aws_account_id}:user/production-terraform",
       username = "production-terraform",
       groups   = ["system:masters"],
     },
@@ -104,7 +106,7 @@ module "eks-public" {
   ]
 
   aws_auth_accounts = [
-    "200564066411",
+    local.aws_account_id,
   ]
 }
 

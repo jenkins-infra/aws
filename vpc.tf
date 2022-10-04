@@ -22,12 +22,14 @@ module "vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${local.cluster_name}"        = "shared"
+    "kubernetes.io/cluster/${local.public_cluster_name}" = "shared"
   }
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                      = "1"
+    # "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${local.public_cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                             = "1"
   }
 
   private_subnet_tags = {

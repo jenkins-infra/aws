@@ -79,6 +79,7 @@ module "eks-public" {
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = ["::/0"]
     },
+    # https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2462
     ingress_allow_access_from_control_plane = {
       type                          = "ingress"
       protocol                      = "tcp"

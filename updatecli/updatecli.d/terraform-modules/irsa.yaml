@@ -27,7 +27,7 @@ sources:
 
 targets:
   upgradeModuleVersion:
-    name: Update the Terraform module version of terraform-aws-modules/eks/aws in irsa.tf
+    name: Update the Terraform module version of terraform-aws-modules/eks/aws
     kind: file
     sourceid: getLatestVersion
     spec:

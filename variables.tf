@@ -9,3 +9,8 @@ variable "kubernetes_version" {
   default     = "1.22"
   description = "Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html"
 }
+
+variable "cluster_name" {
+  type        = string
+  default     = ""
+}

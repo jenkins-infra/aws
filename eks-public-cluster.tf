@@ -11,9 +11,10 @@ module "eks-public" {
   cluster_name = local.public_cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
-  subnet_ids      = module.vpc.private_subnets
+  subnet_ids      = concat(module.vpc.private_subnets, module.vpc.public_subnets)
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
-  # useful for autoscaler, EKS addons and any AWS APi usage
+  # useful for autoscaler, EKS addons, NLB and any AWS API usage
+  # See list at https://github.com/terraform-aws-modules/terraform-aws-iam/tree/master/modules/iam-role-for-service-accounts-eks
   enable_irsa = true
 
   # Specifying the kubernetes provider to use for this cluster
@@ -56,15 +57,14 @@ module "eks-public" {
       instance_types       = ["t4g.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 1
-      max_size             = 3 # Allow manual scaling when running operations or upgrades
-      desired_size         = 2
+      max_size             = local.public_cluster_max_size # Allow manual scaling when running operations or upgrades
+      desired_size         = 1
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
       suspended_processes  = ["AZRebalance"]
       tags = {
-        "k8s.io/cluster-autoscaler/enabled" = false # No autoscaling for these 2 machines
+        "k8s.io/cluster-autoscaler/enabled" = true # Autoscaling enabled
+        "k8s.io/cluster-autoscaler/${local.public_cluster_name}" = "owned",
       },
-      # # Add the NLB policy role (need to be created first)
-      # iam_role_additional_policies = ["arn:aws:iam::${local.aws_account_id}:policy/AWSLoadBalancerControllerIAMPolicy"]
     },
   }
 
@@ -79,6 +79,14 @@ module "eks-public" {
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = ["::/0"]
     },
+    ingress_allow_access_from_control_plane = {
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 9443
+      to_port                       = 9443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
+    }
   }
 
   # aws-auth configmap

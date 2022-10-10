@@ -4,10 +4,7 @@ resource "random_string" "suffix" {
 }
 
 resource "random_pet" "suffix_public" {
-  keepers = {
-    // TODO: fix me!
-    cluster_name = var.cluster_name
-  }
+  # You want to taint this resource in order to get a new pet
 }
 
 locals {

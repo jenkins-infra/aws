@@ -15,7 +15,3 @@ resource "aws_iam_policy" "cluster_nlb" {
   # Cf https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
   policy = file("iam-nlb-policy.json") #tfsec:ignore:aws-iam-no-policy-wildcards
 }
-
-# data "aws_iam_policy" "cluster_nlb" {
-#   name = aws_iam_policy.cluster_nlb.arn
-# }

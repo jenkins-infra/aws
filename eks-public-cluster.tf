@@ -11,9 +11,10 @@ module "eks-public" {
   cluster_name = local.public_cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
-  subnet_ids      = module.vpc.private_subnets
+  subnet_ids      = module.vpc.public_subnets
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
-  # useful for autoscaler, EKS addons and any AWS APi usage
+  # useful for autoscaler, EKS addons, NLB and any AWS API usage
+  # See list at https://github.com/terraform-aws-modules/terraform-aws-iam/tree/master/modules/iam-role-for-service-accounts-eks
   enable_irsa = true
 
   # Specifying the kubernetes provider to use for this cluster
@@ -61,7 +62,8 @@ module "eks-public" {
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
       suspended_processes  = ["AZRebalance"]
       tags = {
-        "k8s.io/cluster-autoscaler/enabled" = false # No autoscaling for these 2 machines
+        "k8s.io/cluster-autoscaler/enabled"                      = true # Autoscaling enabled
+        "k8s.io/cluster-autoscaler/${local.public_cluster_name}" = "owned",
       },
     },
   }
@@ -77,6 +79,15 @@ module "eks-public" {
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = ["::/0"]
     },
+    # https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2462
+    ingress_allow_access_from_control_plane = {
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 9443
+      to_port                       = 9443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
+    }
   }
 
   # aws-auth configmap
@@ -85,13 +96,13 @@ module "eks-public" {
   aws_auth_users = [
     # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
     {
-      userarn  = "arn:aws:iam::200564066411:role/infra-admin",
+      userarn  = "arn:aws:iam::${local.aws_account_id}:role/infra-admin",
       username = "infra-admin",
       groups   = ["system:masters"],
     },
     # User defined in infra.ci.jenkins.io system to operate terraform
     {
-      userarn  = "arn:aws:iam::200564066411:user/production-terraform",
+      userarn  = "arn:aws:iam::${local.aws_account_id}:user/production-terraform",
       username = "production-terraform",
       groups   = ["system:masters"],
     },
@@ -104,7 +115,7 @@ module "eks-public" {
   ]
 
   aws_auth_accounts = [
-    "200564066411",
+    local.aws_account_id,
   ]
 }
 

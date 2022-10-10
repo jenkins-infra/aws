@@ -11,7 +11,6 @@ module "eks-public" {
   cluster_name = local.public_cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
-  # subnet_ids      = concat(module.vpc.private_subnets, module.vpc.public_subnets)
   subnet_ids = module.vpc.public_subnets
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
   # useful for autoscaler, EKS addons, NLB and any AWS API usage

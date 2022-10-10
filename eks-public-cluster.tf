@@ -57,7 +57,7 @@ module "eks-public" {
       instance_types       = ["t4g.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 1
-      max_size             = local.public_cluster_max_size # Allow manual scaling when running operations or upgrades
+      max_size             = 2 # Allow manual scaling when running operations or upgrades
       desired_size         = 1
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
       suspended_processes  = ["AZRebalance"]

@@ -21,7 +21,6 @@ locals {
   k8s_autoscaler_service_account_name      = "cluster-autoscaler-aws-cluster-autoscaler-chart"
   k8s_nlb_service_account_namespace        = "nlb"
   k8s_nlb_service_account_name             = "aws-load-balancer-controller"
-  public_cluster_max_size                  = 2
   #AWS security groups related
   aws_security_groups = ["infraci:infra.ci.jenkins.io:20.72.105.159/32", "release:release.ci.jenkins.io:52.177.88.13/32"]
 

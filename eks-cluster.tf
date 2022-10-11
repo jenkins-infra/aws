@@ -11,7 +11,9 @@ module "eks" {
   cluster_name = local.cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
-  subnet_ids      = module.vpc.private_subnets
+  # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
+  # We're using the 3 first private_subnets defined in vpc.tf for this cluster
+  subnet_ids      = slice(module.vpc.private_subnets, 0, 3)
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true

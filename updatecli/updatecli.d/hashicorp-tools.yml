@@ -47,7 +47,7 @@ pullrequests:
   default:
     kind: github
     scmid: default
-    name: Bump hashicorp-tools docker image version to {{ source "dockerHashicorpToolsImageVersion" }}
+    title: Bump hashicorp-tools docker image version to {{ source "dockerHashicorpToolsImageVersion" }}
     spec:
       labels:
         - dependencies

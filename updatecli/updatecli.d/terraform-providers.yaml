@@ -19,7 +19,9 @@ sources:
     spec:
       command: bash ./updatecli/scripts/terraform-get-upgraded-lockfile.sh ./
       environments:
+        ## These variables are required when using ASDF or homebrew terraform installation
         - name: PATH
+        - name: HOME
         - name: ASDF_DIR
 
 targets:

@@ -5,6 +5,9 @@ provider "aws" {
 provider "local" {
 }
 
+provider "random" {
+}
+
 provider "kubernetes" {
   alias                  = "eks-public"
   host                   = data.aws_eks_cluster.public-cluster.endpoint

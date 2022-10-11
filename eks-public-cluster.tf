@@ -11,9 +11,10 @@ module "eks-public" {
   cluster_name = local.public_cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
-  # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
-  # We're using the 3 last private_subnets defined in vpc.tf for this cluster
-  subnet_ids      = slice(module.vpc.private_subnets, 3, 6)
+  # Start is inclusive, end is exclusive (!): from index 3 to index 5 (https://www.terraform.io/language/functions/slice)
+  # We're using the 3 last private_subnets and public_subnets defined in vpc.tf for this cluster
+  # Public subnets are required for load balancer
+  subnet_ids      = concat(slice(module.vpc.private_subnets, 3, 6), slice(module.vpc.public_subnets, 3, 6))
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
   # useful for autoscaler, EKS addons, NLB and any AWS API usage
   # See list at https://github.com/terraform-aws-modules/terraform-aws-iam/tree/master/modules/iam-role-for-service-accounts-eks

@@ -1,4 +1,6 @@
-module "eks_iam_assumable_role_autoscaler_eks" {
+## TODO: Proceed to renaming
+# module "eks_iam_assumable_role_autoscaler_eks" {
+module "eks_iam_role_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.5.0"
   create_role                   = true

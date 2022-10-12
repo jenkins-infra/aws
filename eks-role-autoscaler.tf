@@ -10,7 +10,6 @@ module "eks_iam_role_autoscaler" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
-    scope              = "terraform-managed"
     associated_service = "eks/${local.cluster_name}"
   }
 }
@@ -25,7 +24,6 @@ module "eks_iam_assumable_role_autoscaler_eks_public" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
-    scope              = "terraform-managed"
     associated_service = "eks/${local.public_cluster_name}"
   }
 }
@@ -34,10 +32,6 @@ resource "aws_iam_policy" "cluster_autoscaler" {
   name_prefix = "cluster-autoscaler"
   description = "EKS cluster-autoscaler policy"
   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
-
-  tags = {
-    scope = "terraform-managed"
-  }
 }
 
 ## No restriction on te resources: either managed outside terraform, or already scoped by conditions

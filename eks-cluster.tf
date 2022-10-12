@@ -4,7 +4,6 @@ resource "aws_kms_key" "eks" {
   enable_key_rotation = true
 
   tags = {
-    scope              = "terraform-managed"
     associated_service = "eks/${local.cluster_name}"
   }
 }
@@ -34,7 +33,6 @@ module "eks" {
     Environment        = "jenkins-infra-${terraform.workspace}"
     GithubRepo         = "aws"
     GithubOrg          = "jenkins-infra"
-    scope              = "terraform-managed"
     associated_service = "eks/${local.cluster_name}"
   }
 

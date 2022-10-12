@@ -1,3 +1,5 @@
+@Library('pipeline-library@pull/489/head') _
+
 def dockerImage = 'jenkinsciinfra/hashicorp-tools:0.5.74'
 
 parallel(

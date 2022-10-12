@@ -2,6 +2,11 @@
 resource "aws_kms_key" "eks" {
   description         = "EKS Secret Encryption Key"
   enable_key_rotation = true
+
+  tags = {
+    scope              = "terraform-managed"
+    associated_service = "eks/${local.cluster_name}"
+  }
 }
 
 # EKS Cluster definition
@@ -13,7 +18,7 @@ module "eks" {
   cluster_version = var.kubernetes_version
   # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 first private_subnets defined in vpc.tf for this cluster
-  subnet_ids      = slice(module.vpc.private_subnets, 0, 3)
+  subnet_ids = slice(module.vpc.private_subnets, 0, 3)
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true
@@ -26,9 +31,11 @@ module "eks" {
   ]
 
   tags = {
-    Environment = "jenkins-infra-${terraform.workspace}"
-    GithubRepo  = "aws"
-    GithubOrg   = "jenkins-infra"
+    Environment        = "jenkins-infra-${terraform.workspace}"
+    GithubRepo         = "aws"
+    GithubOrg          = "jenkins-infra"
+    scope              = "terraform-managed"
+    associated_service = "eks/${local.cluster_name}"
   }
 
   # VPC is defined in vpc.tf

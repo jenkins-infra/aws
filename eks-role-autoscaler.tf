@@ -8,22 +8,36 @@ module "eks_iam_role_autoscaler" {
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
+
+  tags = {
+    scope              = "terraform-managed"
+    associated_service = "eks/${local.cluster_name}"
+  }
 }
 
-module "eks_iam_assumable_role_autoscaler_eks_public" {
-  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.0"
-  create_role                   = true
-  role_name                     = "cluster-autoscaler-eks-public"
-  provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
-  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
-  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
-}
+# module "eks_iam_assumable_role_autoscaler_eks_public" {
+#   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+#   version                       = "5.5.0"
+#   create_role                   = true
+#   role_name                     = "cluster-autoscaler-eks-public"
+#   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
+#   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+#   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
+
+#   tags = {
+#     scope              = "terraform-managed"
+#     associated_service = "eks/${local.public_cluster_name}"
+#   }
+# }
 
 resource "aws_iam_policy" "cluster_autoscaler" {
   name_prefix = "cluster-autoscaler"
   description = "EKS cluster-autoscaler policy"
   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
+
+  tags = {
+    scope = "terraform-managed"
+  }
 }
 
 ## No restriction on te resources: either managed outside terraform, or already scoped by conditions

@@ -10,6 +10,10 @@ resource "aws_iam_policy" "jenkins_ec2_agents" {
   description = "IAM Policy to allow a Jenkins Controller to start and manage EC2 agents with the 'ec2' plugin."
 
   policy = data.aws_iam_policy_document.jenkins_ec2_agents.json
+
+  tags = {
+    scope = "terraform-managed"
+  }
 }
 
 ## Allow wildcard for resource as the EC2 instance IDs are not known in advance
@@ -70,6 +74,7 @@ resource "aws_key_pair" "ec2_agents" {
 
   tags = {
     jenkins = trimspace(element(split("#", each.key), 1))
+    scope   = "terraform-managed"
   }
 }
 
@@ -145,5 +150,6 @@ resource "aws_security_group" "ec2_agents_security" {
 
   tags = {
     jenkins = trimspace(element(split(":", each.key), 1))
+    scope   = "terraform-managed"
   }
 }

@@ -66,9 +66,9 @@ module "eks-public" {
       ami_type             = "AL2_ARM_64"
       instance_types       = ["t4g.xlarge"]
       capacity_type        = "ON_DEMAND"
-      min_size             = 1
-      max_size             = 2 # Allow manual scaling when running operations or upgrades
-      desired_size         = 1
+      min_size             = 2
+      max_size             = 4 # Allow manual scaling when running operations or upgrades
+      desired_size         = 2
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
       suspended_processes  = ["AZRebalance"]
       tags = {

@@ -1,5 +1,11 @@
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = {
+      scope      = "terraform-managed"
+      repository = "jenkins-infra/aws"
+    }
+  }
 }
 
 provider "local" {

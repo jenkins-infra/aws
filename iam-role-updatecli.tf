@@ -14,10 +14,6 @@ resource "aws_iam_policy" "updatecli" {
   path        = "/"
   description = "IAM Policy to allow updatecli to update AMIs and associated AWS resources."
   policy      = data.aws_iam_policy_document.updatecli.json
-
-  tags = {
-    scope = "terraform-managed"
-  }
 }
 
 data "aws_iam_policy_document" "updatecli" {

@@ -7,7 +7,7 @@ resource "aws_kms_key" "eks-public" {
 # EKS Cluster definition
 module "eks-public" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "18.30.0"
+  version      = "18.30.1"
   cluster_name = local.public_cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version

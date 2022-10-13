@@ -23,12 +23,12 @@ module "vpc" {
     "10.0.0.32/28", # 10.0.0.33 -> 10.0.0.46
     "10.0.0.48/28", # 10.0.0.49 -> 10.0.0.62
   ]
-  
+
   # One NAT gateway per AZ
   # ref. https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest#one-nat-gateway-per-availability-zone
-  enable_nat_gateway   = true
-  single_nat_gateway   = false
+  enable_nat_gateway     = true
+  single_nat_gateway     = false
   one_nat_gateway_per_az = false
-  
+
   enable_dns_hostnames = true
 }

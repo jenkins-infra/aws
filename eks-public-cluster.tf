@@ -60,7 +60,7 @@ module "eks-public" {
   eks_managed_node_groups = {
     default_linux = {
       # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
-      name                 = "default-linux"
+      name                 = "eks-public-default-linux"
       instance_types       = ["t3a.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 2

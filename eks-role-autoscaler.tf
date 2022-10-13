@@ -34,7 +34,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
 }
 
-## No restriction on te resources: either managed outside terraform, or already scoped by conditions
+## No restriction on the resources: either managed outside terraform, or already scoped by conditions
 #tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "cluster_autoscaler" {
   statement {

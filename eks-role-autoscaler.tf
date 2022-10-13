@@ -26,7 +26,7 @@ module "eks_iam_role_autoscaler" {
 #   tags = {
 #     associated_service = "eks/${local.public_cluster_name}"
 #   }
-}
+# }
 
 resource "aws_iam_policy" "cluster_autoscaler" {
   name_prefix = "cluster-autoscaler"

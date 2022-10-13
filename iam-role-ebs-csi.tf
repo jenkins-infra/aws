@@ -16,7 +16,7 @@ module "eks-public_irsa_ebs" {
 resource "aws_iam_policy" "ebs_csi" {
   name        = "AmazonEBSCSIDriverPolicy"
   description = "EKS EBS CSI policy"
-  policy = data.aws_iam_policy_document.ebs.json
+  policy      = data.aws_iam_policy_document.ebs.json
 }
 
 ## No restriction on the resources: either managed outside terraform, or already scoped by conditions
@@ -48,11 +48,11 @@ data "aws_iam_policy_document" "ebs" {
     effect = "Allow"
 
     actions = [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:DescribeKey"
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
     ]
 
     ## Allow wildcard for resource as it's used to request AMIs with their IDs unknwon in Terraform

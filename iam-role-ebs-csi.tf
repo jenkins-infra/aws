@@ -1,16 +1,16 @@
-module "eks-public_irsa_ebs" {
-  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.1"
-  create_role                   = true
-  role_name                     = local.ebs_account_name
-  provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
-  role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
-  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
+# module "eks-public_irsa_ebs" {
+#   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+#   version                       = "5.5.1"
+#   create_role                   = true
+#   role_name                     = local.ebs_account_name
+#   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
+#   role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
+#   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
-  tags = {
-    associated_service = "eks/${local.public_cluster_name}"
-  }
-}
+#   tags = {
+#     associated_service = "eks/${local.public_cluster_name}"
+#   }
+# }
 
 # https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html
 resource "aws_iam_policy" "ebs_csi" {

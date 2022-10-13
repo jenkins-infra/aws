@@ -33,8 +33,8 @@ targets:
     sourceid: getLatestVersion
     spec:
       files:
-        - eks-role-autoscaler.tf
-        - iam-role-nlb.tf
+        - eks-cluster.tf
+        - eks-public-cluster.tf
       matchpattern: >-
         source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"(\r\n|\r|\n)(.*)version(.*)=(.*)
       replacepattern: >-

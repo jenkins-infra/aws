@@ -58,11 +58,10 @@ module "eks-public" {
   }
 
   eks_managed_node_groups = {
-    arm-4c16g = {
-      # This worker pool is expected to host public services such as artifact-caching-proxy, etc.
-      name                 = "arm-4c16g"
-      ami_type             = "AL2_ARM_64"
-      instance_types       = ["t4g.xlarge"]
+    tiny_ondemand_linux = {
+      # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
+      name                 = "tiny-ondemand-linux"
+      instance_types       = ["t3a.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 2
       max_size             = 4 # Allow manual scaling when running operations or upgrades

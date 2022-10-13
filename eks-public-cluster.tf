@@ -55,6 +55,7 @@ module "eks-public" {
     vpc-cni = {
       resolve_conflicts = "OVERWRITE"
     }
+    ebs-csi = {}
   }
 
   eks_managed_node_groups = {

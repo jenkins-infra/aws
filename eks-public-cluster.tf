@@ -17,8 +17,7 @@ module "eks-public" {
   cluster_version = var.kubernetes_version
   # Start is inclusive, end is exclusive (!): from index 3 to index 5 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 last private_subnets defined in vpc.tf for this cluster
-  # Public subnets are required for load balancer
-  subnet_ids = concat(slice(module.vpc.private_subnets, 3, 6))
+  subnet_ids = slice(module.vpc.private_subnets, 3, 6)
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
   # useful for autoscaler, EKS addons, NLB and any AWS API usage
   # See list at https://github.com/terraform-aws-modules/terraform-aws-iam/tree/master/modules/iam-role-for-service-accounts-eks
@@ -59,9 +58,9 @@ module "eks-public" {
   }
 
   eks_managed_node_groups = {
-    tiny_ondemand_linux = {
+    default_linux = {
       # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
-      name                 = "tiny-ondemand-linux"
+      name                 = "default-linux"
       instance_types       = ["t3a.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 2
@@ -78,15 +77,6 @@ module "eks-public" {
 
   # Allow egress from nodes (and pods...)
   node_security_group_additional_rules = {
-    egress_http = {
-      description      = "Allow egress to plain HTTP"
-      protocol         = "TCP"
-      from_port        = 80
-      to_port          = 80
-      type             = "egress"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = ["::/0"]
-    },
     # https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2462
     ingress_allow_access_from_control_plane = {
       type                          = "ingress"
@@ -134,6 +124,48 @@ module "eks-public" {
   aws_auth_accounts = [
     local.aws_account_id,
   ]
+}
+
+module "eks_iam_assumable_role_autoscaler_eks_public" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.5.1"
+  create_role                   = true
+  role_name                     = "cluster-autoscaler-eks-public"
+  provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
+
+  tags = {
+    associated_service = "eks/${local.public_cluster_name}"
+  }
+}
+
+module "eks-public_irsa_nlb" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.5.1"
+  create_role                   = true
+  role_name                     = local.nlb_account_name
+  provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.cluster_nlb.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.nlb_account_namespace}:${local.nlb_account_name}"]
+
+  tags = {
+    associated_service = "eks/${local.public_cluster_name}"
+  }
+}
+
+module "eks-public_irsa_ebs" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.5.1"
+  create_role                   = true
+  role_name                     = local.ebs_account_name
+  provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
+
+  tags = {
+    associated_service = "eks/${local.public_cluster_name}"
+  }
 }
 
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management

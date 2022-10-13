@@ -107,6 +107,22 @@ module "eks" {
   }
 }
 
+## TODO: Proceed to renaming
+# module "eks_iam_assumable_role_autoscaler_eks" {
+module "eks_iam_role_autoscaler" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.5.1"
+  create_role                   = true
+  role_name                     = "cluster-autoscaler"
+  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
+
+  tags = {
+    associated_service = "eks/${local.cluster_name}"
+  }
+}
+
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
 data "aws_iam_user" "eks_charter" {
   user_name = "eks_charter"

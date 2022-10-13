@@ -22,28 +22,13 @@ module "vpc" {
     "10.0.0.16/28", # 10.0.0.17 -> 10.0.0.30
     "10.0.0.32/28", # 10.0.0.33 -> 10.0.0.46
     "10.0.0.48/28", # 10.0.0.49 -> 10.0.0.62
-    # next for eks-public
-    "10.0.0.64/28", # 10.0.0.65 -> 10.0.0.78
-    "10.0.0.80/28", # 10.0.0.81 -> 10.0.0.94
-    "10.0.0.96/28", # 10.0.0.97 -> 10.0.0.123
   ]
-
+  
+  # One NAT gateway per AZ
+  # ref. https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest#one-nat-gateway-per-availability-zone
   enable_nat_gateway   = true
-  single_nat_gateway   = true
+  single_nat_gateway   = false
+  one_nat_gateway_per_az = false
+  
   enable_dns_hostnames = true
-
-  # both the public and private subnets must be tagged with the cluster name(s) 
-  # https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/deploy/subnet_discovery/#common-tag
-  tags = {
-    "kubernetes.io/cluster/${local.cluster_name}"        = "shared"
-    "kubernetes.io/cluster/${local.public_cluster_name}" = "shared"
-  }
-
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = "1"
-  }
-
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = "1"
-  }
 }

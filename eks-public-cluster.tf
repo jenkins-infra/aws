@@ -59,7 +59,7 @@ module "eks-public" {
 
   eks_managed_node_groups = {
     tiny_ondemand_linux = {
-      # This worker pool is expected to host the "technical" services such as pod autoscaler, etc.
+      # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
       name                 = "tiny-ondemand-linux"
       instance_types       = ["t3a.xlarge"]
       capacity_type        = "ON_DEMAND"

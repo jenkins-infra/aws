@@ -19,7 +19,7 @@ locals {
   public_cluster_name          = "public-${random_pet.suffix_public.id}"
   autoscaler_account_namespace = "autoscaler"
   autoscaler_account_name      = "cluster-autoscaler-aws-cluster-autoscaler-chart"
-  nlb_account_namespace        = "nlb"
+  nlb_account_namespace        = "aws-load-balancer"
   nlb_account_name             = "aws-load-balancer-controller"
   ebs_account_namespace        = "ebs"
   ebs_account_name             = "ebs-csi-controller-sa"

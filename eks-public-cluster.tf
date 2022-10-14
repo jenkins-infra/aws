@@ -77,6 +77,15 @@ module "eks-public" {
 
   # Allow egress from nodes (and pods...)
   node_security_group_additional_rules = {
+    egress_http = {
+      description      = "Allow egress to plain HTTP"
+      protocol         = "TCP"
+      from_port        = 80
+      to_port          = 80
+      type             = "egress"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+    },
     # https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2462
     ingress_allow_access_from_control_plane = {
       type                          = "ingress"

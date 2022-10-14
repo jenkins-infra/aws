@@ -61,6 +61,9 @@ module "eks-public" {
     default_linux = {
       # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
       name                 = "eks-public-linux"
+      # Opt-in in to the default EKS security group to allow inter-nodes communications inside this node group
+      # Ref. https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/18.16.0#security-groups
+      attach_cluster_primary_security_group = true
       instance_types       = ["t3a.xlarge"]
       capacity_type        = "ON_DEMAND"
       min_size             = 2
@@ -77,15 +80,6 @@ module "eks-public" {
 
   # Allow egress from nodes (and pods...)
   node_security_group_additional_rules = {
-    egress_http = {
-      description      = "Allow egress to plain HTTP"
-      protocol         = "TCP"
-      from_port        = 80
-      to_port          = 80
-      type             = "egress"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = ["::/0"]
-    },
     # https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2462
     ingress_allow_access_from_control_plane = {
       type                          = "ingress"

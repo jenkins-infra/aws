@@ -28,7 +28,7 @@ module "vpc" {
   # ref. https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest#one-nat-gateway-per-availability-zone
   enable_nat_gateway     = true
   single_nat_gateway     = false
-  one_nat_gateway_per_az = false
+  one_nat_gateway_per_az = true
 
   enable_dns_hostnames = true
 

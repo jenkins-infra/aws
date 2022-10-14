@@ -24,8 +24,8 @@ module "vpc" {
     "10.0.0.48/28", # 10.0.0.49 -> 10.0.0.62
   ]
 
-  # One NAT gateway per AZ
-  # ref. https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest#one-nat-gateway-per-availability-zone
+  # One NAT gateway per subnet (default)
+  # ref. https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest#one-nat-gateway-per-subnet-default
   enable_nat_gateway     = true
   single_nat_gateway     = false
   one_nat_gateway_per_az = false

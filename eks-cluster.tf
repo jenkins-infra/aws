@@ -2,16 +2,22 @@
 resource "aws_kms_key" "eks" {
   description         = "EKS Secret Encryption Key"
   enable_key_rotation = true
+
+  tags = {
+    associated_service = "eks/${local.cluster_name}"
+  }
 }
 
 # EKS Cluster definition
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "18.29.0"
+  version      = "18.30.2"
   cluster_name = local.cluster_name
   # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = var.kubernetes_version
-  subnet_ids      = module.vpc.private_subnets
+  # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
+  # We're using the 3 first private_subnets defined in vpc.tf for this cluster
+  subnet_ids = slice(module.vpc.private_subnets, 0, 3)
   # Required to allow EKS service accounts to authenticate to AWS API through OIDC (and assume IAM roles)
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true
@@ -24,9 +30,10 @@ module "eks" {
   ]
 
   tags = {
-    Environment = "jenkins-infra-${terraform.workspace}"
-    GithubRepo  = "aws"
-    GithubOrg   = "jenkins-infra"
+    Environment        = "jenkins-infra-${terraform.workspace}"
+    GithubRepo         = "aws"
+    GithubOrg          = "jenkins-infra"
+    associated_service = "eks/${local.cluster_name}"
   }
 
   # VPC is defined in vpc.tf
@@ -66,7 +73,7 @@ module "eks" {
       # Instances of 16 vCPUs /	64 Gb each
       instance_types      = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
       spot_instance_pools = 6 # Amount of different instance that we can use
-      min_size            = 1
+      min_size            = 0
       max_size            = 50
       desired_size        = 1
       kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
@@ -97,6 +104,22 @@ module "eks" {
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = ["::/0"]
     },
+  }
+}
+
+## TODO: Proceed to renaming
+# module "eks_iam_assumable_role_autoscaler_eks" {
+module "eks_iam_role_autoscaler" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.5.2"
+  create_role                   = true
+  role_name                     = "cluster-autoscaler"
+  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
+
+  tags = {
+    associated_service = "eks/${local.cluster_name}"
   }
 }
 

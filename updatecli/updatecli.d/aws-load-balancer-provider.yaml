@@ -15,6 +15,7 @@ scms:
 sources:
   getLatestVersion:
     kind: githubrelease
+    name: "Retrieve the latest version"
     spec:
       owner: "kubernetes-sigs"
       repository: "aws-load-balancer-controller"

@@ -27,7 +27,7 @@ sources:
     kind: file
     spec:
       # https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.3/docs/install/iam_policy.json
-      file: 'https://raw.githubusercontent.com/jenkins-infra/aws-load-balancer-controller/{{ source "getLatestVersion" }}/docs/install/iam_policy.json'
+      file: 'https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/{{ source "getLatestVersion" }}/docs/install/iam_policy.json'
 
 targets:
   updateTerraformFile:

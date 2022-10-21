@@ -1,4 +1,4 @@
-title: Bump `aws-load-balancer-controller` version and IAM policy content
+name: Bump `aws-load-balancer-controller` version and IAM policy content
 
 scms:
   default:

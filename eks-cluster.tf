@@ -14,7 +14,7 @@ module "eks" {
   version      = "18.30.2"
   cluster_name = local.cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
-  cluster_version = "1.22"
+  cluster_version = "1.23"
   # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 first private_subnets defined in vpc.tf for this cluster
   subnet_ids = slice(module.vpc.private_subnets, 0, 3)
@@ -48,6 +48,7 @@ module "eks" {
     vpc-cni = {
       resolve_conflicts = "OVERWRITE"
     }
+    aws-ebs-csi-driver = {}
   }
 
   eks_managed_node_groups = {
@@ -117,6 +118,20 @@ module "eks_iam_role_autoscaler" {
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
+
+  tags = {
+    associated_service = "eks/${local.cluster_name}"
+  }
+}
+
+module "eks_irsa_ebs" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.5.2"
+  create_role                   = true
+  role_name                     = local.ebs_account_name
+  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
   tags = {
     associated_service = "eks/${local.cluster_name}"

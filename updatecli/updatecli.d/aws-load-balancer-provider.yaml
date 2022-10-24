@@ -35,7 +35,7 @@ targets:
     name: Update aws-load-balancer-controller version in terraform file
     kind: file
     spec:
-      file: ./iam-role-nlb.tf
+      file: ./iam-roles-eks.tf
       matchpattern: 'aws-load-balancer-controller/(.*)/docs'
       replacepattern: 'aws-load-balancer-controller/{{ source "getLatestContent" }}/docs'
     scmid: default

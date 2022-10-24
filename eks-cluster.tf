@@ -48,6 +48,7 @@ module "eks" {
     vpc-cni = {
       resolve_conflicts = "OVERWRITE"
     }
+    aws-ebs-csi-driver = {}
   }
 
   eks_managed_node_groups = {

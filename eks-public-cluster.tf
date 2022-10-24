@@ -13,8 +13,8 @@ module "eks-public" {
   source       = "terraform-aws-modules/eks/aws"
   version      = "18.30.2"
   cluster_name = local.public_cluster_name
-  # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
-  cluster_version = var.kubernetes_version
+  # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
+  cluster_version = "1.22"
   # Start is inclusive, end is exclusive (!): from index 3 to index 5 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 last private_subnets defined in vpc.tf for this cluster
   subnet_ids = slice(module.vpc.private_subnets, 3, 6)
@@ -60,17 +60,17 @@ module "eks-public" {
   eks_managed_node_groups = {
     default_linux = {
       # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
-      name                 = "eks-public-linux"
+      name = "eks-public-linux"
       # Opt-in in to the default EKS security group to allow inter-nodes communications inside this node group
       # Ref. https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/18.16.0#security-groups
       attach_cluster_primary_security_group = true
-      instance_types       = ["t3a.xlarge"]
-      capacity_type        = "ON_DEMAND"
-      min_size             = 2
-      max_size             = 4 # Allow manual scaling when running operations or upgrades
-      desired_size         = 2
-      bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
-      suspended_processes  = ["AZRebalance"]
+      instance_types                        = ["t3a.xlarge"]
+      capacity_type                         = "ON_DEMAND"
+      min_size                              = 2
+      max_size                              = 4 # Allow manual scaling when running operations or upgrades
+      desired_size                          = 2
+      bootstrap_extra_args                  = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
+      suspended_processes                   = ["AZRebalance"]
       tags = {
         "k8s.io/cluster-autoscaler/enabled"                      = true # Autoscaling enabled
         "k8s.io/cluster-autoscaler/${local.public_cluster_name}" = "owned",

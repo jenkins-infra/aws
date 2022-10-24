@@ -124,6 +124,20 @@ module "eks_iam_role_autoscaler" {
   }
 }
 
+module "eks_irsa_ebs" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.5.2"
+  create_role                   = true
+  role_name                     = local.ebs_account_name
+  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
+
+  tags = {
+    associated_service = "eks/${local.cluster_name}"
+  }
+}
+
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
 data "aws_iam_user" "eks_charter" {
   user_name = "eks_charter"

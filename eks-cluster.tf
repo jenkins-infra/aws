@@ -13,8 +13,8 @@ module "eks" {
   source       = "terraform-aws-modules/eks/aws"
   version      = "18.30.2"
   cluster_name = local.cluster_name
-  # From https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
-  cluster_version = var.kubernetes_version
+  # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
+  cluster_version = "1.22"
   # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 first private_subnets defined in vpc.tf for this cluster
   subnet_ids = slice(module.vpc.private_subnets, 0, 3)

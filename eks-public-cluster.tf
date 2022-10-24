@@ -14,7 +14,7 @@ module "eks-public" {
   version      = "18.30.2"
   cluster_name = local.public_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
-  cluster_version = "1.22"
+  cluster_version = "1.23"
   # Start is inclusive, end is exclusive (!): from index 3 to index 5 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 last private_subnets defined in vpc.tf for this cluster
   subnet_ids = slice(module.vpc.private_subnets, 3, 6)

@@ -39,16 +39,25 @@ module "eks" {
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id
 
-  ## Manage EKS addons with module
+  ## Manage EKS addons with module - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon
   cluster_addons = {
     coredns = {
+      addon_version     = "v1.8.7-eksbuild.3"
       resolve_conflicts = "OVERWRITE"
     }
-    kube-proxy = {}
+    kube-proxy = {
+      addon_version     = "v1.23.8-eksbuild.2"
+      resolve_conflicts = "OVERWRITE"
+    }
     vpc-cni = {
+      addon_version     = "v1.11.4-eksbuild.1"
       resolve_conflicts = "OVERWRITE"
     }
-    aws-ebs-csi-driver = {}
+    aws-ebs-csi-driver = {
+      addon_version            = "v1.11.4-eksbuild.1"
+      resolve_conflicts        = "OVERWRITE"
+      service_account_role_arn = module.eks_irsa_ebs.iam_role_arn
+    }
   }
 
   eks_managed_node_groups = {

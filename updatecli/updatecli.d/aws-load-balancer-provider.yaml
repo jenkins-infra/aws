@@ -36,7 +36,7 @@ targets:
     kind: file
     spec:
       file: ./iam-roles-eks.tf
-      matchpattern: 'aws-load-balancer-controller/(.*)/docs'
+      matchpattern: 'aws-load-balancer-controller\/(.*)\/docs'
       replacepattern: 'aws-load-balancer-controller/{{ source "getLatestContent" }}/docs'
     scmid: default
   updateJSONFile:

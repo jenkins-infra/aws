@@ -195,3 +195,15 @@ data "aws_eks_cluster" "public-cluster" {
 data "aws_eks_cluster_auth" "public-cluster" {
   name = module.eks-public.cluster_id
 }
+
+resource "aws_network_interface" "lb_public" {
+  for_each  = toset(module.vpc.public_subnets)
+  subnet_id = each.key
+}
+
+resource "aws_eip" "lb_public" {
+  for_each = aws_network_interface.lb_public
+
+  network_interface = each.value.id
+  vpc               = true
+}

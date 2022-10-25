@@ -196,14 +196,11 @@ data "aws_eks_cluster_auth" "public-cluster" {
   name = module.eks-public.cluster_id
 }
 
-resource "aws_network_interface" "lb_public" {
-  for_each  = toset(module.vpc.public_subnets)
-  subnet_id = each.key
-}
-
+# Elastic IP used for the Public Load Balancer (so that the IP never changes)
 resource "aws_eip" "lb_public" {
-  for_each = aws_network_interface.lb_public
+  vpc = true
 
-  network_interface = each.value.id
-  vpc               = true
+  tags = {
+    "Name" = "eks-public-loadbalancer-external"
+  }
 }

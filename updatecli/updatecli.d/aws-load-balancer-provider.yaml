@@ -22,7 +22,7 @@ sources:
       token: "{{ requiredEnv .github.token }}"
       username: "{{ .github.username }}"
   getLatestContent:
-    depends_on:
+    dependson:
       - getLatestVersion
     kind: file
     spec:
@@ -31,13 +31,13 @@ sources:
 
 targets:
   updateTerraformFile:
-    sourceid: "getLatestVersion"
+    disablesourceinput: true
     name: Update aws-load-balancer-controller version in terraform file
     kind: file
     spec:
       file: ./iam-roles-eks.tf
-      matchpattern: 'aws-load-balancer-controller\/(.*)\/docs'
-      replacepattern: 'aws-load-balancer-controller/{{ source "getLatestContent" }}/docs'
+      matchpattern: aws-load-balancer-controller\/(.*)\/docs
+      replacepattern: aws-load-balancer-controller/{{ source "getLatestVersion" }}/docs
     scmid: default
   updateJSONFile:
     sourceid: "getLatestContent"

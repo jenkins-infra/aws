@@ -11,7 +11,7 @@ resource "aws_kms_key" "eks" {
 # EKS Cluster definition
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "18.30.2"
+  version      = "18.30.3"
   cluster_name = local.cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.23"

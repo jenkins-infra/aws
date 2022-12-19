@@ -83,8 +83,10 @@ module "eks-public" {
     },
   }
 
-  # aws-auth configmap
+  create_aws_auth_configmap = true
   manage_aws_auth_configmap = true
+
+  cluster_endpoint_public_access = true
 
   aws_auth_users = [
     # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
@@ -158,11 +160,6 @@ module "eks-public_irsa_ebs" {
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management
 data "aws_iam_user" "eks_public_charter" {
   user_name = "eks_charter"
-}
-
-# Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
-data "aws_eks_cluster" "public-cluster" {
-  name = module.eks-public.cluster_name
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)

@@ -22,12 +22,10 @@ module "eks" {
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true
 
-  cluster_encryption_config = [
-    {
-      provider_key_arn = aws_kms_key.eks.arn
-      resources        = ["secrets"]
-    }
-  ]
+  cluster_encryption_config = {
+    provider_key_arn = aws_kms_key.eks.arn
+    resources        = ["secrets"]
+  }
 
   tags = {
     Environment        = "jenkins-infra-${terraform.workspace}"

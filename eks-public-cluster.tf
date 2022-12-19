@@ -28,12 +28,10 @@ module "eks-public" {
     kubernetes = kubernetes.eks-public
   }
 
-  cluster_encryption_config = [
-    {
-      provider_key_arn = aws_kms_key.eks.arn
-      resources        = ["secrets"]
-    }
-  ]
+  cluster_encryption_config = {
+    provider_key_arn = aws_kms_key.eks.arn
+    resources        = ["secrets"]
+  }
 
   tags = {
     Environment        = "jenkins-infra-${terraform.workspace}"

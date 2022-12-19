@@ -149,7 +149,7 @@ module "eks_iam_assumable_role_autoscaler_eks_public" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks-public.cluster_id}"
+    associated_service = "eks/${module.eks-public.cluster_name}"
   }
 }
 
@@ -163,7 +163,7 @@ module "eks-public_irsa_nlb" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.nlb_account_namespace}:${local.nlb_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks-public.cluster_id}"
+    associated_service = "eks/${module.eks-public.cluster_name}"
   }
 }
 
@@ -178,7 +178,7 @@ module "eks-public_irsa_ebs" {
   oidc_fully_qualified_subjects  = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks-public.cluster_id}"
+    associated_service = "eks/${module.eks-public.cluster_name}"
   }
 }
 
@@ -189,12 +189,12 @@ data "aws_iam_user" "eks_public_charter" {
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster" "public-cluster" {
-  name = module.eks-public.cluster_id
+  name = module.eks-public.cluster_name
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster_auth" "public-cluster" {
-  name = module.eks-public.cluster_id
+  name = module.eks-public.cluster_name
 }
 
 # Elastic IPs used for the Public Load Balancer (so that the addresses never change)

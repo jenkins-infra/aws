@@ -129,7 +129,7 @@ module "eks_iam_role_autoscaler" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks.cluster_id}"
+    associated_service = "eks/${module.eks.cluster_name}"
   }
 }
 
@@ -143,7 +143,7 @@ module "eks_irsa_ebs" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks.cluster_id}"
+    associated_service = "eks/${module.eks.cluster_name}"
   }
 }
 
@@ -154,10 +154,10 @@ data "aws_iam_user" "eks_charter" {
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_id
+  name = module.eks.cluster_name
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_id
+  name = module.eks.cluster_name
 }

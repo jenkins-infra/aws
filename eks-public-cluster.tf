@@ -83,28 +83,6 @@ module "eks-public" {
     },
   }
 
-  # Allow egress from nodes (and pods...)
-  node_security_group_additional_rules = {
-    # https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2462
-    ingress_allow_access_from_control_plane = {
-      type                          = "ingress"
-      protocol                      = "tcp"
-      from_port                     = 9443
-      to_port                       = 9443
-      source_cluster_security_group = true
-      description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
-    },
-    # nginx-ingress requires the cluster to communicate with the ingress controller
-    cluster_to_node = {
-      description                   = "Cluster to ingress-nginx webhook"
-      protocol                      = "-1"
-      from_port                     = 8443
-      to_port                       = 8443
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-  }
-
   # aws-auth configmap
   manage_aws_auth_configmap = true
 

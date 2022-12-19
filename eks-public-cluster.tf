@@ -11,7 +11,7 @@ resource "aws_kms_key" "eks-public" {
 # EKS Cluster definition
 module "eks-public" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "18.31.2"
+  version      = "19.3.1"
   cluster_name = local.public_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.23"
@@ -28,12 +28,11 @@ module "eks-public" {
     kubernetes = kubernetes.eks-public
   }
 
-  cluster_encryption_config = [
-    {
-      provider_key_arn = aws_kms_key.eks.arn
-      resources        = ["secrets"]
-    }
-  ]
+  create_kms_key = false
+  cluster_encryption_config = {
+    provider_key_arn = aws_kms_key.eks.arn
+    resources        = ["secrets"]
+  }
 
   tags = {
     Environment        = "jenkins-infra-${terraform.workspace}"
@@ -48,20 +47,16 @@ module "eks-public" {
   ## Manage EKS addons with module - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon
   cluster_addons = {
     coredns = {
-      addon_version     = "v1.8.7-eksbuild.3"
-      resolve_conflicts = "OVERWRITE"
+      addon_version = "v1.8.7-eksbuild.3"
     }
     kube-proxy = {
-      addon_version     = "v1.23.8-eksbuild.2"
-      resolve_conflicts = "OVERWRITE"
+      addon_version = "v1.23.8-eksbuild.2"
     }
     vpc-cni = {
-      addon_version     = "v1.11.4-eksbuild.1"
-      resolve_conflicts = "OVERWRITE"
+      addon_version = "v1.11.4-eksbuild.1"
     }
     aws-ebs-csi-driver = {
       addon_version            = "v1.11.4-eksbuild.1"
-      resolve_conflicts        = "OVERWRITE"
       service_account_role_arn = module.eks-public_irsa_ebs.iam_role_arn
     }
   }
@@ -84,7 +79,7 @@ module "eks-public" {
         "k8s.io/cluster-autoscaler/enabled"                      = true # Autoscaling enabled
         "k8s.io/cluster-autoscaler/${local.public_cluster_name}" = "owned",
       },
-      create_security_group     = false
+      create_security_group = false
     },
   }
 
@@ -149,7 +144,7 @@ module "eks_iam_assumable_role_autoscaler_eks_public" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks-public.cluster_id}"
+    associated_service = "eks/${module.eks-public.cluster_name}"
   }
 }
 
@@ -163,7 +158,7 @@ module "eks-public_irsa_nlb" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.nlb_account_namespace}:${local.nlb_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks-public.cluster_id}"
+    associated_service = "eks/${module.eks-public.cluster_name}"
   }
 }
 
@@ -178,7 +173,7 @@ module "eks-public_irsa_ebs" {
   oidc_fully_qualified_subjects  = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks-public.cluster_id}"
+    associated_service = "eks/${module.eks-public.cluster_name}"
   }
 }
 
@@ -189,12 +184,12 @@ data "aws_iam_user" "eks_public_charter" {
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster" "public-cluster" {
-  name = module.eks-public.cluster_id
+  name = module.eks-public.cluster_name
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster_auth" "public-cluster" {
-  name = module.eks-public.cluster_id
+  name = module.eks-public.cluster_name
 }
 
 # Elastic IPs used for the Public Load Balancer (so that the addresses never change)

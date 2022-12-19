@@ -11,7 +11,7 @@ resource "aws_kms_key" "eks" {
 # EKS Cluster definition
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "18.31.2"
+  version      = "19.3.1"
   cluster_name = local.cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.23"
@@ -22,12 +22,11 @@ module "eks" {
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true
 
-  cluster_encryption_config = [
-    {
-      provider_key_arn = aws_kms_key.eks.arn
-      resources        = ["secrets"]
-    }
-  ]
+  create_kms_key = false
+  cluster_encryption_config = {
+    provider_key_arn = aws_kms_key.eks.arn
+    resources        = ["secrets"]
+  }
 
   tags = {
     Environment        = "jenkins-infra-${terraform.workspace}"
@@ -42,20 +41,16 @@ module "eks" {
   ## Manage EKS addons with module - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon
   cluster_addons = {
     coredns = {
-      addon_version     = "v1.8.7-eksbuild.3"
-      resolve_conflicts = "OVERWRITE"
+      addon_version = "v1.8.7-eksbuild.3"
     }
     kube-proxy = {
-      addon_version     = "v1.23.8-eksbuild.2"
-      resolve_conflicts = "OVERWRITE"
+      addon_version = "v1.23.8-eksbuild.2"
     }
     vpc-cni = {
-      addon_version     = "v1.11.4-eksbuild.1"
-      resolve_conflicts = "OVERWRITE"
+      addon_version = "v1.11.4-eksbuild.1"
     }
     aws-ebs-csi-driver = {
       addon_version            = "v1.11.4-eksbuild.1"
-      resolve_conflicts        = "OVERWRITE"
       service_account_role_arn = module.eks_irsa_ebs.iam_role_arn
     }
   }
@@ -74,7 +69,7 @@ module "eks" {
       tags = {
         "k8s.io/cluster-autoscaler/enabled" = false # No autoscaling for these 2 machines
       },
-      create_security_group     = false
+      create_security_group = false
     },
     # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
     # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
@@ -92,7 +87,7 @@ module "eks" {
         "k8s.io/cluster-autoscaler/enabled"               = true,
         "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",
       }
-      create_security_group     = false
+      create_security_group = false
     },
   }
 
@@ -129,7 +124,7 @@ module "eks_iam_role_autoscaler" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks.cluster_id}"
+    associated_service = "eks/${module.eks.cluster_name}"
   }
 }
 
@@ -143,7 +138,7 @@ module "eks_irsa_ebs" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks.cluster_id}"
+    associated_service = "eks/${module.eks.cluster_name}"
   }
 }
 
@@ -154,10 +149,10 @@ data "aws_iam_user" "eks_charter" {
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_id
+  name = module.eks.cluster_name
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
 data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_id
+  name = module.eks.cluster_name
 }

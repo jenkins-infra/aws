@@ -27,6 +27,8 @@ module "eks" {
     provider_key_arn = aws_kms_key.eks.arn
     resources        = ["secrets"]
   }
+    
+  cluster_endpoint_public_access = true
 
   tags = {
     Environment        = "jenkins-infra-${terraform.workspace}"

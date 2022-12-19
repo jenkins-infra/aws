@@ -74,6 +74,7 @@ module "eks" {
       tags = {
         "k8s.io/cluster-autoscaler/enabled" = false # No autoscaling for these 2 machines
       },
+      create_security_group     = false
     },
     # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
     # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
@@ -91,6 +92,7 @@ module "eks" {
         "k8s.io/cluster-autoscaler/enabled"               = true,
         "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",
       }
+      create_security_group     = false
     },
   }
 

@@ -23,7 +23,7 @@ locals {
   nlb_account_name             = "aws-load-balancer-controller"
   ebs_account_namespace        = "kube-system"
   ebs_account_name             = "ebs-csi-controller-sa"
-  #AWS security groups related
+  # AWS security groups related
   aws_security_groups = ["infraci:infra.ci.jenkins.io:20.72.105.159/32", "release:release.ci.jenkins.io:52.177.88.13/32"]
 
 }

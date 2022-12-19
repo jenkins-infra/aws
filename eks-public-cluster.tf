@@ -84,6 +84,7 @@ module "eks-public" {
         "k8s.io/cluster-autoscaler/enabled"                      = true # Autoscaling enabled
         "k8s.io/cluster-autoscaler/${local.public_cluster_name}" = "owned",
       },
+      create_security_group     = false
     },
   }
 

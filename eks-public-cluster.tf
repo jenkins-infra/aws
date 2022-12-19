@@ -28,6 +28,7 @@ module "eks-public" {
     kubernetes = kubernetes.eks-public
   }
 
+  create_kms_key = false
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.eks.arn
     resources        = ["secrets"]
@@ -46,13 +47,13 @@ module "eks-public" {
   ## Manage EKS addons with module - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon
   cluster_addons = {
     coredns = {
-      addon_version     = "v1.8.7-eksbuild.3"
+      addon_version = "v1.8.7-eksbuild.3"
     }
     kube-proxy = {
-      addon_version     = "v1.23.8-eksbuild.2"
+      addon_version = "v1.23.8-eksbuild.2"
     }
     vpc-cni = {
-      addon_version     = "v1.11.4-eksbuild.1"
+      addon_version = "v1.11.4-eksbuild.1"
     }
     aws-ebs-csi-driver = {
       addon_version            = "v1.11.4-eksbuild.1"
@@ -78,7 +79,7 @@ module "eks-public" {
         "k8s.io/cluster-autoscaler/enabled"                      = true # Autoscaling enabled
         "k8s.io/cluster-autoscaler/${local.public_cluster_name}" = "owned",
       },
-      create_security_group     = false
+      create_security_group = false
     },
   }
 

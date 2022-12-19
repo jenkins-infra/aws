@@ -97,8 +97,8 @@ module "eks-public" {
     },
     # User defined in infra.ci.jenkins.io system to operate terraform
     {
-      userarn  = "arn:aws:iam::${local.aws_account_id}:user/production-terraform",
-      username = "production-terraform",
+      userarn  = "arn:aws:iam::${local.aws_account_id}:user/terraform-aws-production",
+      username = "terraform-aws-production",
       groups   = ["system:masters"],
     },
     # User for administrating the charts from github.com/jenkins-infra/kubernetes-management

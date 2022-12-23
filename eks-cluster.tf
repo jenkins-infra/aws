@@ -27,15 +27,17 @@ module "eks" {
     provider_key_arn = aws_kms_key.eks.arn
     resources        = ["secrets"]
   }
-    
+
   cluster_endpoint_public_access = true
 
-  tags = {
-    Environment        = "jenkins-infra-${terraform.workspace}"
-    GithubRepo         = "aws"
-    GithubOrg          = "jenkins-infra"
-    associated_service = "eks/${local.cluster_name}"
-  }
+  ## TODO: Uncomment when https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337 is resolved
+  # create_cluster_primary_security_group_tags = false
+  # tags = {
+  #   Environment        = "jenkins-infra-${terraform.workspace}"
+  #   GithubRepo         = "aws"
+  #   GithubOrg          = "jenkins-infra"
+  #   associated_service = "eks/${local.cluster_name}"
+  # }
 
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id

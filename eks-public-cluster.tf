@@ -11,7 +11,7 @@ resource "aws_kms_key" "eks-public" {
 # EKS Cluster definition
 module "eks-public" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "19.4.0"
+  version      = "19.4.2"
   cluster_name = local.public_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.23"
@@ -34,12 +34,14 @@ module "eks-public" {
     resources        = ["secrets"]
   }
 
-  tags = {
-    Environment        = "jenkins-infra-${terraform.workspace}"
-    GithubRepo         = "aws"
-    GithubOrg          = "jenkins-infra"
-    associated_service = "eks/${local.public_cluster_name}"
-  }
+  ## TODO: Uncomment when https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337 is resolved
+  # create_cluster_primary_security_group_tags = false
+  # tags = {
+  #   Environment        = "jenkins-infra-${terraform.workspace}"
+  #   GithubRepo         = "aws"
+  #   GithubOrg          = "jenkins-infra"
+  #   associated_service = "eks/${local.public_cluster_name}"
+  # }
 
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id

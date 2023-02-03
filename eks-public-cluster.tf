@@ -34,14 +34,14 @@ module "eks-public" {
     resources        = ["secrets"]
   }
 
-  ## TODO: Uncomment when https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337 is resolved
-  # create_cluster_primary_security_group_tags = false
-  # tags = {
-  #   Environment        = "jenkins-infra-${terraform.workspace}"
-  #   GithubRepo         = "aws"
-  #   GithubOrg          = "jenkins-infra"
-  #   associated_service = "eks/${local.public_cluster_name}"
-  # }
+  create_cluster_primary_security_group_tags = false
+
+  tags = {
+    Environment        = "jenkins-infra-${terraform.workspace}"
+    GithubRepo         = "aws"
+    GithubOrg          = "jenkins-infra"
+    associated_service = "eks/eks-public" # Do not use interpolation from a "local" or any "resource"
+  }
 
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id

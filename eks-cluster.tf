@@ -30,14 +30,14 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
-  ## TODO: Uncomment when https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337 is resolved
-  # create_cluster_primary_security_group_tags = false
-  # tags = {
-  #   Environment        = "jenkins-infra-${terraform.workspace}"
-  #   GithubRepo         = "aws"
-  #   GithubOrg          = "jenkins-infra"
-  #   associated_service = "eks/${local.cluster_name}"
-  # }
+  create_cluster_primary_security_group_tags = false
+
+  tags = {
+    Environment        = "jenkins-infra-${terraform.workspace}"
+    GithubRepo         = "aws"
+    GithubOrg          = "jenkins-infra"
+    associated_service = "eks/cik8s" # Do not use interpolation from a "local" or any "resource"
+  }
 
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id
@@ -73,7 +73,7 @@ module "eks" {
       tags = {
         "k8s.io/cluster-autoscaler/enabled" = false # No autoscaling for these 2 machines
       },
-      create_security_group = false
+      attach_cluster_primary_security_group = true
     },
     # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
     # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
@@ -91,7 +91,7 @@ module "eks" {
         "k8s.io/cluster-autoscaler/enabled"               = true,
         "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",
       }
-      create_security_group = false
+      attach_cluster_primary_security_group = true
     },
   }
 

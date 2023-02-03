@@ -32,11 +32,15 @@ module "eks" {
 
   create_cluster_primary_security_group_tags = false
 
+  # Do not use interpolated values from `local` in either keys and values of provided tags (or `cluster_tags)
+  # To avoid having and implicit dependency to a resource not available when parsing the module (infamous errror `Error: Invalid for_each argument`)
+  # Ref. same error as having a `depends_on` in https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337
   tags = {
     Environment        = "jenkins-infra-${terraform.workspace}"
     GithubRepo         = "aws"
     GithubOrg          = "jenkins-infra"
-    associated_service = "eks/cik8s" # Do not use interpolation from a "local" or any "resource"
+
+    associated_service = "eks/cik8s"
   }
 
   # VPC is defined in vpc.tf

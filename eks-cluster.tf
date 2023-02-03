@@ -36,9 +36,9 @@ module "eks" {
   # To avoid having and implicit dependency to a resource not available when parsing the module (infamous errror `Error: Invalid for_each argument`)
   # Ref. same error as having a `depends_on` in https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337
   tags = {
-    Environment        = "jenkins-infra-${terraform.workspace}"
-    GithubRepo         = "aws"
-    GithubOrg          = "jenkins-infra"
+    Environment = "jenkins-infra-${terraform.workspace}"
+    GithubRepo  = "aws"
+    GithubOrg   = "jenkins-infra"
 
     associated_service = "eks/cik8s"
   }

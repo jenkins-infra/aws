@@ -70,9 +70,6 @@ module "eks-public" {
   eks_managed_node_group_defaults = {
     instance_types       = ["t3a.xlarge"]
     capacity_type        = "ON_DEMAND"
-    min_size             = 0
-    max_size             = 2
-    desired_size         = 0
     bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
     suspended_processes  = ["AZRebalance"]
     tags = {
@@ -82,36 +79,14 @@ module "eks-public" {
   }
 
   eks_managed_node_groups = {
-    # TODO: remove this node pools once the workload is migrated to the 3 others
-    default_linux = {
-      # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
-      name = "eks-public-linux"
-      # No subnet: means all provided to the cluster (e.g. 3 subnet => 3 AZs)
-      min_size     = 2
-      max_size     = 4 # Allow manual scaling when running operations or upgrades
-      desired_size = 2
-
-      # Opt-in in to the default EKS security group to allow inter-nodes communications inside this node group
-      # Ref. https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/18.16.0#security-groups
-      attach_cluster_primary_security_group = true
-      create_security_group                 = false
-    },
-
     # 1 subnet per node poole == 1 AZ per node pool
     default_linux_az1 = {
       # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
-      name       = "eks-public-linux-az1"
-      subnet_ids = [element(module.vpc.public_subnets, 0)]
-    },
-    default_linux_az2 = {
-      # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
-      name       = "eks-public-linux-az2"
-      subnet_ids = [element(module.vpc.public_subnets, 1)]
-    },
-    default_linux_az3 = {
-      # This worker pool is expected to host the "technical" services (such as the autoscaler, the load balancer controller, etc.) and the public services like artifact-caching-proxy
-      name       = "eks-public-linux-az3"
-      subnet_ids = [element(module.vpc.public_subnets, 2)]
+      name         = "eks-public-linux-az1"
+      min_size     = 0
+      max_size     = 4
+      desired_size = 2
+      subnet_ids   = [element(module.vpc.private_subnets, 0)]
     },
   }
 
@@ -207,4 +182,39 @@ resource "aws_eip" "lb_public" {
   tags = {
     "Name" = "eks-public-loadbalancer-external-${count.index}"
   }
+}
+
+# Custom Storage Classes to ensure that EBS PVC are bound to the correct availability zone
+resource "kubernetes_storage_class" "ebs_sc" {
+  metadata {
+    name = "ebs-sc"
+  }
+  storage_provisioner = "ebs.csi.aws.com"
+  reclaim_policy      = "Delete"
+  volume_binding_mode = "WaitForFirstConsumer"
+  allowed_topologies {
+    match_label_expressions {
+      key    = "topology.ebs.csi.aws.com/zone"
+      values = ["us-east-2a"]
+    }
+  }
+
+  provider = kubernetes.eks-public
+}
+
+resource "kubernetes_storage_class" "ebs_sc_retain" {
+  metadata {
+    name = "ebs-sc-retain"
+  }
+  storage_provisioner = "ebs.csi.aws.com"
+  reclaim_policy      = "Retain"
+  volume_binding_mode = "WaitForFirstConsumer"
+  allowed_topologies {
+    match_label_expressions {
+      key    = "topology.ebs.csi.aws.com/zone"
+      values = ["us-east-2a"]
+    }
+  }
+
+  provider = kubernetes.eks-public
 }

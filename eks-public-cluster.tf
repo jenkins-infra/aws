@@ -197,6 +197,7 @@ resource "kubernetes_storage_class" "ebs_sc" {
   storage_provisioner = "ebs.csi.aws.com"
   reclaim_policy      = "Delete"
   volume_binding_mode = "WaitForFirstConsumer"
+  allow_volume_expansion = true
   allowed_topologies {
     match_label_expressions {
       key    = "topology.ebs.csi.aws.com/zone"
@@ -214,6 +215,7 @@ resource "kubernetes_storage_class" "ebs_sc_retain" {
   storage_provisioner = "ebs.csi.aws.com"
   reclaim_policy      = "Retain"
   volume_binding_mode = "WaitForFirstConsumer"
+  allow_volume_expansion = true
   allowed_topologies {
     match_label_expressions {
       key    = "topology.ebs.csi.aws.com/zone"

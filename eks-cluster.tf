@@ -91,7 +91,20 @@ module "eks" {
       name          = "spot-linux-4xlarge"
       capacity_type = "SPOT"
       # Instances of 16 vCPUs /	64 Gb each
-      instance_types      = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
+      instance_types = ["m5.4xlarge", "m5d.4xlarge", "m5a.4xlarge", "m5ad.4xlarge", "m5n.4xlarge", "m5dn.4xlarge"]
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 200 # Same size as DigitalOcean's size. TODO: Synchronize values between all cloud providers
+            volume_type           = "gp3"
+            iops                  = 3000 # Max included with gp3 without additional cost
+            throughput            = 125  # Max included with gp3 without additional cost
+            encrypted             = false
+            delete_on_termination = true
+          }
+        }
+      }
       spot_instance_pools = 6 # Amount of different instance that we can use
       min_size            = 0
       max_size            = 50

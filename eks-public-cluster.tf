@@ -128,7 +128,7 @@ module "eks-public" {
 
 module "eks_iam_assumable_role_autoscaler_eks_public" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.14.3"
+  version                       = "5.14.4"
   create_role                   = true
   role_name                     = "${local.autoscaler_account_name}-eks-public"
   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
@@ -142,7 +142,7 @@ module "eks_iam_assumable_role_autoscaler_eks_public" {
 
 module "eks-public_irsa_nlb" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.14.3"
+  version                       = "5.14.4"
   create_role                   = true
   role_name                     = "${local.nlb_account_name}-eks-public"
   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
@@ -156,7 +156,7 @@ module "eks-public_irsa_nlb" {
 
 module "eks-public_irsa_ebs" {
   source                         = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                        = "5.14.3"
+  version                        = "5.14.4"
   create_role                    = true
   role_name                      = "${local.ebs_account_name}-eks-public"
   provider_url                   = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")

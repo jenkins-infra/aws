@@ -1,8 +1,9 @@
 ## Identity to allow updatecli to update AMIs and associated AWS resources
+## No need to create a group for only 1 user
+#tfsec:ignore:no-user-attached-policies
 resource "aws_iam_user" "updatecli" {
   name = "updatecli"
 }
-
 
 resource "aws_iam_user_policy_attachment" "allow_updatecli_read_ec2" {
   user       = aws_iam_user.updatecli.name

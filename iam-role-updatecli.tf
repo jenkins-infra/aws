@@ -1,11 +1,11 @@
 ## Identity to allow updatecli to update AMIs and associated AWS resources
-data "aws_iam_user" "updatecli" {
-  user_name = "updatecli"
+resource "aws_iam_user" "updatecli" {
+  name = "updatecli"
 }
 
 
 resource "aws_iam_user_policy_attachment" "allow_updatecli_read_ec2" {
-  user       = data.aws_iam_user.updatecli.user_name
+  user       = aws_iam_user.updatecli.name
   policy_arn = aws_iam_policy.updatecli.arn
 }
 

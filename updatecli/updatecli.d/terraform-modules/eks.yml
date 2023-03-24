@@ -41,9 +41,9 @@ targets:
         source${1}=${2}"terraform-aws-modules/eks/aws"${3}${4}version${5}= "{{ source "getLatestVersion" }}"
     scmid: default
 
-pullrequests:
+actions:
   default:
-    kind: github
+    kind: github/pullrequest
     scmid: default
     title: Bump version of the Terraform module "eks" to {{ source "getLatestVersion" }}
     spec:

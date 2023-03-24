@@ -47,9 +47,9 @@ targets:
       file: ./iam-nlb-policy.json
     scmid: default
 
-pullrequests:
+actions:
   default:
-    kind: github
+    kind: github/pullrequest
     scmid: default
     title: Bump `aws-load-balancer-controller` version and IAM policy content to {{ source "getLatestVersion" }}
     spec:

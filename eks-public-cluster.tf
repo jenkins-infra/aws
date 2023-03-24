@@ -194,9 +194,9 @@ resource "kubernetes_storage_class" "ebs_sc" {
   metadata {
     name = "ebs-sc"
   }
-  storage_provisioner = "ebs.csi.aws.com"
-  reclaim_policy      = "Delete"
-  volume_binding_mode = "WaitForFirstConsumer"
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
   allow_volume_expansion = true
   allowed_topologies {
     match_label_expressions {
@@ -212,9 +212,9 @@ resource "kubernetes_storage_class" "ebs_sc_retain" {
   metadata {
     name = "ebs-sc-retain"
   }
-  storage_provisioner = "ebs.csi.aws.com"
-  reclaim_policy      = "Retain"
-  volume_binding_mode = "WaitForFirstConsumer"
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Retain"
+  volume_binding_mode    = "WaitForFirstConsumer"
   allow_volume_expansion = true
   allowed_topologies {
     match_label_expressions {

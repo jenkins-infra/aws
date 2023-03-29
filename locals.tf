@@ -24,6 +24,5 @@ locals {
   ebs_account_namespace        = "kube-system"
   ebs_account_name             = "ebs-csi-controller-sa"
   # AWS security groups related
-  aws_security_groups = ["infraci:infra.ci.jenkins.io:20.96.66.246/32", "release:release.ci.jenkins.io:52.177.88.13/32"]
-
+  aws_security_groups = ["infraci:infra.ci.jenkins.io:20.96.66.246/32", "release:release.ci.jenkins.io:20.96.66.246/32"]
 }

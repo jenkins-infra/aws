@@ -143,7 +143,7 @@ module "eks" {
 
 module "eks_iam_role_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.14.4"
+  version                       = "5.16.0"
   create_role                   = true
   role_name                     = "${local.autoscaler_account_name}-eks"
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
@@ -157,7 +157,7 @@ module "eks_iam_role_autoscaler" {
 
 module "eks_irsa_ebs" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.14.4"
+  version                       = "5.16.0"
   create_role                   = true
   role_name                     = "${local.ebs_account_name}-eks"
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")

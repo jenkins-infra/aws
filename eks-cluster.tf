@@ -96,7 +96,7 @@ module "eks" {
         xvda = {
           device_name = "/dev/xvda"
           ebs = {
-            volume_size           = 200 # Same size as DigitalOcean's size. TODO: Synchronize values between all cloud providers
+            volume_size           = 90 # With 3 pods / machine, that can use ~25 Gb each at the same time (`emptyDir`)
             volume_type           = "gp3"
             iops                  = 3000 # Max included with gp3 without additional cost
             throughput            = 125  # Max included with gp3 without additional cost

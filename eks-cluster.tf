@@ -96,7 +96,7 @@ module "eks" {
         xvda = {
           device_name = "/dev/xvda"
           ebs = {
-            volume_size           = 200 # Same size as DigitalOcean's size. TODO: Synchronize values between all cloud providers
+            volume_size           = 90 # With 3 pods / machine, that can use ~25 Gb each at the same time (`emptyDir`)
             volume_type           = "gp3"
             iops                  = 3000 # Max included with gp3 without additional cost
             throughput            = 125  # Max included with gp3 without additional cost
@@ -143,7 +143,7 @@ module "eks" {
 
 module "eks_iam_role_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.16.0"
+  version                       = "5.17.0"
   create_role                   = true
   role_name                     = "${local.autoscaler_account_name}-eks"
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
@@ -157,7 +157,7 @@ module "eks_iam_role_autoscaler" {
 
 module "eks_irsa_ebs" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.16.0"
+  version                       = "5.17.0"
   create_role                   = true
   role_name                     = "${local.ebs_account_name}-eks"
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")

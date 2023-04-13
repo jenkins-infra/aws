@@ -11,7 +11,7 @@ resource "aws_kms_key" "eks-public" {
 # EKS Cluster definition
 module "eks-public" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "19.11.0"
+  version      = "19.13.0"
   cluster_name = local.public_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.24"
@@ -128,7 +128,7 @@ module "eks-public" {
 
 module "eks_iam_assumable_role_autoscaler_eks_public" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.16.0"
+  version                       = "5.17.0"
   create_role                   = true
   role_name                     = "${local.autoscaler_account_name}-eks-public"
   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
@@ -142,7 +142,7 @@ module "eks_iam_assumable_role_autoscaler_eks_public" {
 
 module "eks-public_irsa_nlb" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.16.0"
+  version                       = "5.17.0"
   create_role                   = true
   role_name                     = "${local.nlb_account_name}-eks-public"
   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
@@ -156,7 +156,7 @@ module "eks-public_irsa_nlb" {
 
 module "eks-public_irsa_ebs" {
   source                         = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                        = "5.16.0"
+  version                        = "5.17.0"
   create_role                    = true
   role_name                      = "${local.ebs_account_name}-eks-public"
   provider_url                   = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")

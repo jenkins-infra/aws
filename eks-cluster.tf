@@ -154,10 +154,10 @@ module "eks" {
         "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",
       }
       attach_cluster_primary_security_group = true
-      labels         = {
-        "ci.jenkins.io/agents-density"                    = 23,
+      labels = {
+        "ci.jenkins.io/agents-density" = 23,
       }
-      taints         = [
+      taints = [
         {
           key    = "ci.jenkins.io/bom"
           value  = "true"

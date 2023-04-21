@@ -103,7 +103,7 @@ module "eks-public" {
   aws_auth_users = [
     # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
     {
-      userarn  = "arn:aws:iam::${local.aws_account_id}:role/infra-admin",
+      userarn  = "arn:aws:iam::${local.aws_account_id}:role/AWSReservedSSO_infra-admin_eaf058d61d35b904",
       username = "infra-admin",
       groups   = ["system:masters"],
     },

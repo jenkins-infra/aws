@@ -28,7 +28,35 @@ module "eks" {
     resources        = ["secrets"]
   }
 
+  create_aws_auth_configmap = true
+  manage_aws_auth_configmap = true
+
   cluster_endpoint_public_access = true
+
+  aws_auth_users = [
+    # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
+    {
+      userarn  = "arn:aws:iam::${local.aws_account_id}:role/AWSReservedSSO_infra-admin_eaf058d61d35b904",
+      username = "infra-admin",
+      groups   = ["system:masters"],
+    },
+    # User defined in infra.ci.jenkins.io system to operate terraform
+    {
+      userarn  = "arn:aws:iam::${local.aws_account_id}:user/terraform-aws-production",
+      username = "terraform-aws-production",
+      groups   = ["system:masters"],
+    },
+    # User for administratin the charts from github.com/jenkins-infra/kubernetes-management
+    {
+      userarn  = data.aws_iam_user.eks_charter.arn,
+      username = data.aws_iam_user.eks_charter.user_name,
+      groups   = ["system:masters"],
+    },
+  ]
+
+  aws_auth_accounts = [
+    local.aws_account_id,
+  ]
 
   create_cluster_primary_security_group_tags = false
 

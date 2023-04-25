@@ -1,10 +1,25 @@
 # Define a KMS main key to encrypt the EKS cluster
-resource "aws_kms_key" "eks-public" {
+# resource "aws_kms_key" "eks-public" {
+#   description         = "EKS Secret Encryption Key"
+#   enable_key_rotation = true
+
+#   tags = {
+#     associated_service = "eks/${local.public_cluster_name}"
+#   }
+# }
+
+moved {
+  from = aws_kms_key.eks
+  to   = aws_kms_key.eks_public
+}
+
+# Define a KMS main key to encrypt the EKS cluster
+resource "aws_kms_key" "eks_public" {
   description         = "EKS Secret Encryption Key"
   enable_key_rotation = true
 
   tags = {
-    associated_service = "eks/${local.public_cluster_name}"
+    associated_service = "eks/${local.cluster_name}"
   }
 }
 
@@ -30,7 +45,7 @@ module "eks-public" {
 
   create_kms_key = false
   cluster_encryption_config = {
-    provider_key_arn = aws_kms_key.eks.arn
+    provider_key_arn = aws_kms_key.eks_public.arn
     resources        = ["secrets"]
   }
 
@@ -126,13 +141,80 @@ module "eks-public" {
   ]
 }
 
+
+## No restriction on the resources: either managed outside terraform, or already scoped by conditions
+#tfsec:ignore:aws-iam-no-policy-wildcards
+data "aws_iam_policy_document" "cluster_autoscaler_public" {
+  statement {
+    sid    = "ec2"
+    effect = "Allow"
+
+    actions = [
+      "ec2:DescribeLaunchTemplateVersions",
+      "ec2:DescribeInstanceTypes",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ec2AutoScaling"
+    effect = "Allow"
+
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeTags",
+    ]
+
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "clusterAutoscalerOwn"
+    effect = "Allow"
+
+    actions = [
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+      "autoscaling:UpdateAutoScalingGroup",
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${module.eks-public.cluster_name}"
+      values   = ["owned"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
+      values   = ["true"]
+    }
+  }
+}
+
+moved {
+  from = aws_iam_policy.cluster_autoscaler
+  to   = aws_iam_policy.cluster_autoscaler_public
+}
+resource "aws_iam_policy" "cluster_autoscaler_public" {
+  name_prefix = "cluster-autoscaler-public"
+  description = "EKS cluster-autoscaler policy for cluster ${local.public_cluster_name}"
+  policy      = data.aws_iam_policy_document.cluster_autoscaler_public.json
+}
+
 module "eks_iam_assumable_role_autoscaler_eks_public" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.17.0"
   create_role                   = true
   role_name                     = "${local.autoscaler_account_name}-eks-public"
   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
-  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+  role_policy_arns              = [aws_iam_policy.cluster_autoscaler_public.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {

@@ -22,6 +22,11 @@ module "eks" {
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true
 
+  # Specifying the kubernetes provider to use for this cluster
+  providers = {
+    kubernetes = kubernetes.eks
+  }
+
   create_kms_key = false
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.eks.arn

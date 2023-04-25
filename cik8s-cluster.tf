@@ -22,12 +22,6 @@ module "cik8s" {
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true
 
-  # Specifying the kubernetes provider to use for this cluster
-  # Note: this should be done AFTER initial cluster creation (bootstrap)
-  providers = {
-    kubernetes = kubernetes.cik8s
-  }
-
   create_kms_key = false
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.cik8s.arn
@@ -290,25 +284,9 @@ module "cik8s_irsa_ebs" {
   }
 }
 
-
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
 data "aws_iam_user" "cik8s_charter" {
   user_name = "cik8s-charter"
-}
-
-data "aws_eks_cluster" "cik8s" {
-  name = local.cik8s_cluster_name
-}
-
-data "aws_eks_cluster_auth" "cik8s" {
-  name = local.cik8s_cluster_name
-}
-
-provider "kubernetes" {
-  alias                  = "cik8s"
-  host                   = data.aws_eks_cluster.cik8s.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cik8s.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.cik8s.token
 }
 
 ## No restriction on the resources: either managed outside terraform, or already scoped by conditions

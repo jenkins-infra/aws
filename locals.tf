@@ -15,7 +15,7 @@ locals {
   ec2_agents_publickeys = compact(split("\n", file("./ec2_agents_authorized_keys")))
 
   # EKS related
-  cluster_name                 = "jenkins-infra-eks-${random_string.suffix.result}"
+  cik8s_cluster_name           = "cik8s-${random_string.suffix.result}"
   public_cluster_name          = "public-${random_pet.suffix_public.id}"
   autoscaler_account_namespace = "autoscaler"
   autoscaler_account_name      = "cluster-autoscaler-aws-cluster-autoscaler-chart"

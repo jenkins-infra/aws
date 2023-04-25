@@ -1,25 +1,10 @@
 # Define a KMS main key to encrypt the EKS cluster
-# resource "aws_kms_key" "eks-public" {
-#   description         = "EKS Secret Encryption Key"
-#   enable_key_rotation = true
-
-#   tags = {
-#     associated_service = "eks/${local.public_cluster_name}"
-#   }
-# }
-
-moved {
-  from = aws_kms_key.eks
-  to   = aws_kms_key.eks_public
-}
-
-# Define a KMS main key to encrypt the EKS cluster
 resource "aws_kms_key" "eks_public" {
-  description         = "EKS Secret Encryption Key"
+  description         = "EKS Secret Encryption Key for the cluster ${local.public_cluster_name}"
   enable_key_rotation = true
 
   tags = {
-    associated_service = "eks/${local.cluster_name}"
+    associated_service = "eks/${local.public_cluster_name}"
   }
 }
 
@@ -198,10 +183,6 @@ data "aws_iam_policy_document" "cluster_autoscaler_public" {
   }
 }
 
-moved {
-  from = aws_iam_policy.cluster_autoscaler
-  to   = aws_iam_policy.cluster_autoscaler_public
-}
 resource "aws_iam_policy" "cluster_autoscaler_public" {
   name_prefix = "cluster-autoscaler-public"
   description = "EKS cluster-autoscaler policy for cluster ${local.public_cluster_name}"

@@ -222,7 +222,7 @@ module "eks-public_irsa_ebs" {
 
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management
 data "aws_iam_user" "eks_public_charter" {
-  user_name = "eks_charter"
+  user_name = "eks-public-charter"
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)

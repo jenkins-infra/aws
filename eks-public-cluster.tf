@@ -100,26 +100,14 @@ module "eks-public" {
 
   cluster_endpoint_public_access = true
 
-  aws_auth_users = [
-    # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
-    {
-      userarn  = "arn:aws:iam::${local.aws_account_id}:role/AWSReservedSSO_infra-admin_eaf058d61d35b904",
-      username = "infra-admin",
-      groups   = ["system:masters"],
-    },
-    # User defined in infra.ci.jenkins.io system to operate terraform
-    {
-      userarn  = "arn:aws:iam::${local.aws_account_id}:user/terraform-aws-production",
-      username = "terraform-aws-production",
-      groups   = ["system:masters"],
-    },
-    # User for administratin the charts from github.com/jenkins-infra/kubernetes-management
+  aws_auth_users = concat(local.configmap_iam_admin_accounts, [
+    # User used by infra.ci.jenkins.io to administrate the charts deployements with github.com/jenkins-infra/kubernetes-management
     {
       userarn  = data.aws_iam_user.eks_public_charter.arn,
       username = data.aws_iam_user.eks_public_charter.user_name,
       groups   = ["system:masters"],
     },
-  ]
+  ])
 
   aws_auth_accounts = [
     local.aws_account_id,
@@ -234,7 +222,7 @@ module "eks-public_irsa_ebs" {
 
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management
 data "aws_iam_user" "eks_public_charter" {
-  user_name = "eks_charter"
+  user_name = "eks-public-charter"
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)

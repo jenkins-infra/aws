@@ -23,6 +23,20 @@ locals {
   nlb_account_name             = "aws-load-balancer-controller"
   ebs_account_namespace        = "kube-system"
   ebs_account_name             = "ebs-csi-controller-sa"
+  configmap_iam_admin_accounts = [
+    # Impersonated role when using the CloudBees Accounts (e.g. humans)
+    {
+      userarn  = "arn:aws:iam::${local.aws_account_id}:role/AWSReservedSSO_infra-admin_eaf058d61d35b904",
+      username = "infra-admin",
+      groups   = ["system:masters"],
+    },
+    # User used by infra.ci.jenkins.io to operate the cluster through terraform (including the configmap itself)
+    {
+      userarn  = "arn:aws:iam::${local.aws_account_id}:user/terraform-aws-production",
+      username = "terraform-aws-production",
+      groups   = ["system:masters"],
+    },
+  ]
   # AWS security groups related
   aws_security_groups = ["infraci:infra.ci.jenkins.io:20.96.66.246/32"]
 }

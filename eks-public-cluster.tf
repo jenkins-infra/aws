@@ -24,6 +24,7 @@ module "eks-public" {
   enable_irsa = true
 
   # Specifying the kubernetes provider to use for this cluster
+  # Note: this should be done AFTER initial cluster creation (bootstrap)
   providers = {
     kubernetes = kubernetes.eks-public
   }

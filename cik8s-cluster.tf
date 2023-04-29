@@ -185,7 +185,7 @@ module "cik8s" {
       attach_cluster_primary_security_group = true
       labels = {
         "ci.jenkins.io/agents-density" = 3,
-        "ci.jenkins.io/bom" = true,
+        "ci.jenkins.io/bom"            = true,
       }
       taints = [
         {
@@ -315,56 +315,37 @@ provider "kubernetes" {
 ## No restriction on the resources: either managed outside terraform, or already scoped by conditions
 #tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "cluster_autoscaler_cik8s" {
+  # Statements as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
   statement {
-    sid    = "ec2"
-    effect = "Allow"
-
-    actions = [
-      "ec2:DescribeLaunchTemplateVersions",
-      "ec2:DescribeInstanceTypes",
-    ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "ec2AutoScaling"
+    sid    = "unrestricted"
     effect = "Allow"
 
     actions = [
       "autoscaling:DescribeAutoScalingGroups",
       "autoscaling:DescribeAutoScalingInstances",
       "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeScalingActivities",
       "autoscaling:DescribeTags",
+      "ec2:DescribeInstanceTypes",
+      "ec2:DescribeLaunchTemplateVersions"
     ]
-
 
     resources = ["*"]
   }
 
   statement {
-    sid    = "clusterAutoscalerOwn"
+    sid    = "restricted"
     effect = "Allow"
 
     actions = [
       "autoscaling:SetDesiredCapacity",
       "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "autoscaling:UpdateAutoScalingGroup",
+      "ec2:DescribeImages",
+      "ec2:GetInstanceTypesFromInstanceRequirements",
+      "eks:DescribeNodegroup"
     ]
 
     resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${module.cik8s.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
-      values   = ["true"]
-    }
   }
 }
 

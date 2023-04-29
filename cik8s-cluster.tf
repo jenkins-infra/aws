@@ -152,7 +152,7 @@ module "cik8s" {
     # Pricing table for 2023: https://docs.google.com/spreadsheets/d/1_C0I0jE-X0e0vDcdKOFIWcnwpOqWC8RQ4YOCgXNnplY/edit?usp=sharing
     spot_linux_4xlarge_bom = {
       # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
-      name          = "spot-linux-4xlarge"
+      name          = "spot-linux-4xlarge-bom"
       capacity_type = "SPOT"
       # Less than 5% eviction rate, cost below $0.08 per pod per hour
       instance_types = [

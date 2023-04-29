@@ -110,133 +110,134 @@ module "cik8s" {
     # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
     # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
     # Pricing table for 2023: https://docs.google.com/spreadsheets/d/1_C0I0jE-X0e0vDcdKOFIWcnwpOqWC8RQ4YOCgXNnplY/edit?usp=sharing
-    # spot_linux_4xlarge = {
-    #   # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
-    #   name          = "spot-linux-4xlarge"
-    #   capacity_type = "SPOT"
-    #   # Less than 5% eviction rate, cost below $0.08 per pod per hour
-    #   instance_types = [
-    #     "c5.4xlarge",
-    #     "c5a.4xlarge"
-    #   ]
-    #   block_device_mappings = {
-    #     xvda = {
-    #       device_name = "/dev/xvda"
-    #       ebs = {
-    #         volume_size           = 90 # With 3 pods / machine, that can use ~30 Gb each at the same time (`emptyDir`)
-    #         volume_type           = "gp3"
-    #         iops                  = 3000 # Max included with gp3 without additional cost
-    #         throughput            = 125  # Max included with gp3 without additional cost
-    #         encrypted             = false
-    #         delete_on_termination = true
-    #       }
-    #     }
-    #   }
-    #   spot_instance_pools = 3 # Amount of different instance that we can use
-    #   min_size            = 0
-    #   max_size            = 50
-    #   desired_size        = 0
-    #   kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-    #   tags = {
-    #     "k8s.io/cluster-autoscaler/enabled"                     = true,
-    #     "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
-    #     "ci.jenkins.io/agents-density"                          = 3,
-    #   }
-    #   attach_cluster_primary_security_group = true
-    #   labels = {
-    #     "ci.jenkins.io/agents-density" = 3,
-    #   }
-    # },
-    # # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
-    # # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
-    # # Pricing table for 2023: https://docs.google.com/spreadsheets/d/1_C0I0jE-X0e0vDcdKOFIWcnwpOqWC8RQ4YOCgXNnplY/edit?usp=sharing
-    # spot_linux_4xlarge_bom = {
-    #   # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
-    #   name          = "spot-linux-4xlarge"
-    #   capacity_type = "SPOT"
-    #   # Less than 5% eviction rate, cost below $0.08 per pod per hour
-    #   instance_types = [
-    #     "c5.4xlarge",
-    #     "c5a.4xlarge"
-    #   ]
-    #   block_device_mappings = {
-    #     xvda = {
-    #       device_name = "/dev/xvda"
-    #       ebs = {
-    #         volume_size           = 90 # With 3 pods / machine, that can use ~30 Gb each at the same time (`emptyDir`)
-    #         volume_type           = "gp3"
-    #         iops                  = 3000 # Max included with gp3 without additional cost
-    #         throughput            = 125  # Max included with gp3 without additional cost
-    #         encrypted             = false
-    #         delete_on_termination = true
-    #       }
-    #     }
-    #   }
-    #   spot_instance_pools = 3 # Amount of different instance that we can use
-    #   min_size            = 0
-    #   max_size            = 50
-    #   desired_size        = 0
-    #   kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-    #   tags = {
-    #     "k8s.io/cluster-autoscaler/enabled"                     = true,
-    #     "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
-    #     "ci.jenkins.io/agents-density"                          = 3,
-    #   }
-    #   attach_cluster_primary_security_group = true
-    #   labels = {
-    #     "ci.jenkins.io/agents-density" = 3,
-    #   }
-    #   taints = [
-    #     {
-    #       key    = "ci.jenkins.io/bom"
-    #       value  = "true"
-    #       effect = "NO_SCHEDULE"
-    #     }
-    #   ]
-    # },
-    # spot_linux_24xlarge_bom = {
-    #   # 24xlarge: Instances supporting 23 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
-    #   name          = "spot-linux-24xlarge"
-    #   capacity_type = "SPOT"
-    #   # Less than 5% eviction rate, cost below $0.05 per pod per hour
-    #   instance_types = [
-    #     "m5.24xlarge",
-    #     "c5.24xlarge",
-    #   ]
-    #   block_device_mappings = {
-    #     xvda = {
-    #       device_name = "/dev/xvda"
-    #       ebs = {
-    #         volume_size           = 575 # With 23 pods / machine, that can use ~25 Gb each at the same time (`emptyDir`)
-    #         volume_type           = "gp3"
-    #         iops                  = 3000 # Max included with gp3 without additional cost
-    #         throughput            = 125  # Max included with gp3 without additional cost
-    #         encrypted             = false
-    #         delete_on_termination = true
-    #       }
-    #     }
-    #   }
-    #   spot_instance_pools = 2 # Amount of different instance that we can use
-    #   min_size            = 0
-    #   max_size            = 15
-    #   desired_size        = 0
-    #   kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-    #   tags = {
-    #     "k8s.io/cluster-autoscaler/enabled"                     = true,
-    #     "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
-    #   }
-    #   attach_cluster_primary_security_group = true
-    #   labels = {
-    #     "ci.jenkins.io/agents-density" = 23,
-    #   }
-    #   taints = [
-    #     {
-    #       key    = "ci.jenkins.io/bom"
-    #       value  = "true"
-    #       effect = "NO_SCHEDULE"
-    #     }
-    #   ]
-    # },
+    spot_linux_4xlarge = {
+      # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
+      name          = "spot-linux-4xlarge"
+      capacity_type = "SPOT"
+      # Less than 5% eviction rate, cost below $0.08 per pod per hour
+      instance_types = [
+        "c5.4xlarge",
+        "c5a.4xlarge"
+      ]
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 90 # With 3 pods / machine, that can use ~30 Gb each at the same time (`emptyDir`)
+            volume_type           = "gp3"
+            iops                  = 3000 # Max included with gp3 without additional cost
+            throughput            = 125  # Max included with gp3 without additional cost
+            encrypted             = false
+            delete_on_termination = true
+          }
+        }
+      }
+      spot_instance_pools = 3 # Amount of different instance that we can use
+      min_size            = 0
+      max_size            = 50
+      desired_size        = 0
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      tags = {
+        "k8s.io/cluster-autoscaler/enabled"                     = true,
+        "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
+        "ci.jenkins.io/agents-density"                          = 3,
+      }
+      attach_cluster_primary_security_group = true
+      labels = {
+        "ci.jenkins.io/agents-density" = 3,
+      }
+    },
+    # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
+    # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
+    # Pricing table for 2023: https://docs.google.com/spreadsheets/d/1_C0I0jE-X0e0vDcdKOFIWcnwpOqWC8RQ4YOCgXNnplY/edit?usp=sharing
+    spot_linux_4xlarge_bom = {
+      # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
+      name          = "spot-linux-4xlarge-bom"
+      capacity_type = "SPOT"
+      # Less than 5% eviction rate, cost below $0.08 per pod per hour
+      instance_types = [
+        "c5.4xlarge",
+        "c5a.4xlarge"
+      ]
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 90 # With 3 pods / machine, that can use ~30 Gb each at the same time (`emptyDir`)
+            volume_type           = "gp3"
+            iops                  = 3000 # Max included with gp3 without additional cost
+            throughput            = 125  # Max included with gp3 without additional cost
+            encrypted             = false
+            delete_on_termination = true
+          }
+        }
+      }
+      spot_instance_pools = 3 # Amount of different instance that we can use
+      min_size            = 0
+      max_size            = 50
+      desired_size        = 0
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      tags = {
+        "k8s.io/cluster-autoscaler/enabled"                     = true,
+        "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
+        "ci.jenkins.io/agents-density"                          = 3,
+      }
+      attach_cluster_primary_security_group = true
+      labels = {
+        "ci.jenkins.io/agents-density" = 3,
+        "ci.jenkins.io/bom"            = true,
+      }
+      taints = [
+        {
+          key    = "ci.jenkins.io/bom"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      ]
+    },
+    spot_linux_24xlarge_bom = {
+      # 24xlarge: Instances supporting 23 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
+      name          = "spot-linux-24xlarge"
+      capacity_type = "SPOT"
+      # Less than 5% eviction rate, cost below $0.05 per pod per hour
+      instance_types = [
+        "m5.24xlarge",
+        "c5.24xlarge",
+      ]
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 575 # With 23 pods / machine, that can use ~25 Gb each at the same time (`emptyDir`)
+            volume_type           = "gp3"
+            iops                  = 3000 # Max included with gp3 without additional cost
+            throughput            = 125  # Max included with gp3 without additional cost
+            encrypted             = false
+            delete_on_termination = true
+          }
+        }
+      }
+      spot_instance_pools = 2 # Amount of different instance that we can use
+      min_size            = 0
+      max_size            = 15
+      desired_size        = 0
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      tags = {
+        "k8s.io/cluster-autoscaler/enabled"                     = true,
+        "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
+      }
+      attach_cluster_primary_security_group = true
+      labels = {
+        "ci.jenkins.io/agents-density" = 23,
+      }
+      taints = [
+        {
+          key    = "ci.jenkins.io/bom"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      ]
+    },
   }
 
   # Allow egress from nodes (and pods...)
@@ -314,56 +315,37 @@ provider "kubernetes" {
 ## No restriction on the resources: either managed outside terraform, or already scoped by conditions
 #tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "cluster_autoscaler_cik8s" {
+  # Statements as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
   statement {
-    sid    = "ec2"
-    effect = "Allow"
-
-    actions = [
-      "ec2:DescribeLaunchTemplateVersions",
-      "ec2:DescribeInstanceTypes",
-    ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "ec2AutoScaling"
+    sid    = "unrestricted"
     effect = "Allow"
 
     actions = [
       "autoscaling:DescribeAutoScalingGroups",
       "autoscaling:DescribeAutoScalingInstances",
       "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeScalingActivities",
       "autoscaling:DescribeTags",
+      "ec2:DescribeInstanceTypes",
+      "ec2:DescribeLaunchTemplateVersions"
     ]
-
 
     resources = ["*"]
   }
 
   statement {
-    sid    = "clusterAutoscalerOwn"
+    sid    = "restricted"
     effect = "Allow"
 
     actions = [
       "autoscaling:SetDesiredCapacity",
       "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "autoscaling:UpdateAutoScalingGroup",
+      "ec2:DescribeImages",
+      "ec2:GetInstanceTypesFromInstanceRequirements",
+      "eks:DescribeNodegroup"
     ]
 
     resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${module.cik8s.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
-      values   = ["true"]
-    }
   }
 }
 

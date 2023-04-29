@@ -1,6 +1,6 @@
 # Define a KMS main key to encrypt the EKS cluster
-resource "aws_kms_key" "eks-public" {
-  description         = "EKS Secret Encryption Key"
+resource "aws_kms_key" "eks_public" {
+  description         = "EKS Secret Encryption Key for the cluster ${local.public_cluster_name}"
   enable_key_rotation = true
 
   tags = {
@@ -11,7 +11,7 @@ resource "aws_kms_key" "eks-public" {
 # EKS Cluster definition
 module "eks-public" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "19.13.0"
+  version      = "19.13.1"
   cluster_name = local.public_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.24"
@@ -24,13 +24,14 @@ module "eks-public" {
   enable_irsa = true
 
   # Specifying the kubernetes provider to use for this cluster
+  # Note: this should be done AFTER initial cluster creation (bootstrap)
   providers = {
     kubernetes = kubernetes.eks-public
   }
 
   create_kms_key = false
   cluster_encryption_config = {
-    provider_key_arn = aws_kms_key.eks.arn
+    provider_key_arn = aws_kms_key.eks_public.arn
     resources        = ["secrets"]
   }
 
@@ -100,30 +101,80 @@ module "eks-public" {
 
   cluster_endpoint_public_access = true
 
-  aws_auth_users = [
-    # User impersonated when using the CloudBees IAM Accounts (e.g. humans)
-    {
-      userarn  = "arn:aws:iam::${local.aws_account_id}:role/infra-admin",
-      username = "infra-admin",
-      groups   = ["system:masters"],
-    },
-    # User defined in infra.ci.jenkins.io system to operate terraform
-    {
-      userarn  = "arn:aws:iam::${local.aws_account_id}:user/terraform-aws-production",
-      username = "terraform-aws-production",
-      groups   = ["system:masters"],
-    },
-    # User for administrating the charts from github.com/jenkins-infra/kubernetes-management
+  aws_auth_users = concat(local.configmap_iam_admin_accounts, [
+    # User used by infra.ci.jenkins.io to administrate the charts deployements with github.com/jenkins-infra/kubernetes-management
     {
       userarn  = data.aws_iam_user.eks_public_charter.arn,
       username = data.aws_iam_user.eks_public_charter.user_name,
       groups   = ["system:masters"],
     },
-  ]
+  ])
 
   aws_auth_accounts = [
     local.aws_account_id,
   ]
+}
+
+## No restriction on the resources: either managed outside terraform, or already scoped by conditions
+#tfsec:ignore:aws-iam-no-policy-wildcards
+data "aws_iam_policy_document" "cluster_autoscaler_public" {
+  statement {
+    sid    = "ec2"
+    effect = "Allow"
+
+    actions = [
+      "ec2:DescribeLaunchTemplateVersions",
+      "ec2:DescribeInstanceTypes",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ec2AutoScaling"
+    effect = "Allow"
+
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeTags",
+    ]
+
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "clusterAutoscalerOwn"
+    effect = "Allow"
+
+    actions = [
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+      "autoscaling:UpdateAutoScalingGroup",
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${module.eks-public.cluster_name}"
+      values   = ["owned"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
+      values   = ["true"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "cluster_autoscaler_public" {
+  name_prefix = "cluster-autoscaler-public"
+  description = "EKS cluster-autoscaler policy for cluster ${local.public_cluster_name}"
+  policy      = data.aws_iam_policy_document.cluster_autoscaler_public.json
 }
 
 module "eks_iam_assumable_role_autoscaler_eks_public" {
@@ -132,7 +183,7 @@ module "eks_iam_assumable_role_autoscaler_eks_public" {
   create_role                   = true
   role_name                     = "${local.autoscaler_account_name}-eks-public"
   provider_url                  = replace(module.eks-public.cluster_oidc_issuer_url, "https://", "")
-  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+  role_policy_arns              = [aws_iam_policy.cluster_autoscaler_public.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
@@ -171,7 +222,7 @@ module "eks-public_irsa_ebs" {
 
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management
 data "aws_iam_user" "eks_public_charter" {
-  user_name = "eks_charter"
+  user_name = "eks-public-charter"
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)

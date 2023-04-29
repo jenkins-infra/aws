@@ -185,6 +185,7 @@ module "cik8s" {
       attach_cluster_primary_security_group = true
       labels = {
         "ci.jenkins.io/agents-density" = 3,
+        "ci.jenkins.io/bom" = true,
       }
       taints = [
         {

@@ -1,18 +1,18 @@
 # Define a KMS main key to encrypt the EKS cluster
-resource "aws_kms_key" "eks" {
-  description         = "EKS Secret Encryption Key"
+resource "aws_kms_key" "cik8s" {
+  description         = "EKS Secret Encryption Key for the cluster ${local.cik8s_cluster_name}"
   enable_key_rotation = true
 
   tags = {
-    associated_service = "eks/${local.cluster_name}"
+    associated_service = "eks/${local.cik8s_cluster_name}"
   }
 }
 
 # EKS Cluster definition
-module "eks" {
+module "cik8s" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "19.13.0"
-  cluster_name = local.cluster_name
+  version      = "19.14.0"
+  cluster_name = local.cik8s_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.24"
   # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
@@ -22,13 +22,35 @@ module "eks" {
   # useful for autoscaler, EKS addons and any AWS APi usage
   enable_irsa = true
 
+  # Specifying the kubernetes provider to use for this cluster
+  # Note: this should be done AFTER initial cluster creation (bootstrap)
+  providers = {
+    kubernetes = kubernetes.cik8s
+  }
+
   create_kms_key = false
   cluster_encryption_config = {
-    provider_key_arn = aws_kms_key.eks.arn
+    provider_key_arn = aws_kms_key.cik8s.arn
     resources        = ["secrets"]
   }
 
+  create_aws_auth_configmap = true
+  manage_aws_auth_configmap = true
+
   cluster_endpoint_public_access = true
+
+  aws_auth_users = concat(local.configmap_iam_admin_accounts, [
+    # User used by infra.ci.jenkins.io to administrate the charts deployements with github.com/jenkins-infra/kubernetes-management
+    {
+      userarn  = data.aws_iam_user.cik8s_charter.arn,
+      username = data.aws_iam_user.cik8s_charter.user_name,
+      groups   = ["system:masters"],
+    },
+  ])
+
+  aws_auth_accounts = [
+    local.aws_account_id,
+  ]
 
   create_cluster_primary_security_group_tags = false
 
@@ -56,16 +78,16 @@ module "eks" {
     # Kube-proxy on an Amazon EKS cluster has the same compatibility and skew policy as Kubernetes
     # See https://kubernetes.io/releases/version-skew-policy/#kube-proxy
     kube-proxy = {
-      addon_version = "v1.24.9-eksbuild.1"
+      addon_version = "v1.24.10-eksbuild.2"
     }
     # https://github.com/aws/amazon-vpc-cni-k8s/releases
     vpc-cni = {
-      addon_version = "v1.12.2-eksbuild.1"
+      addon_version = "v1.12.6-eksbuild.1"
     }
     # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/CHANGELOG.md
     aws-ebs-csi-driver = {
-      addon_version            = "v1.16.0-eksbuild.1"
-      service_account_role_arn = module.eks_irsa_ebs.iam_role_arn
+      addon_version            = "v1.17.0-eksbuild.1"
+      service_account_role_arn = module.cik8s_irsa_ebs.iam_role_arn
     }
   }
 
@@ -116,13 +138,64 @@ module "eks" {
       desired_size        = 0
       kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
       tags = {
-        "k8s.io/cluster-autoscaler/enabled"               = true,
-        "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",
-        "ci.jenkins.io/agents-density"                    = 3,
+        "k8s.io/cluster-autoscaler/enabled"                     = true,
+        "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
+        "ci.jenkins.io/agents-density"                          = 3,
       }
       attach_cluster_primary_security_group = true
+      labels = {
+        "ci.jenkins.io/agents-density" = 3,
+      }
     },
-    spot_linux_24xlarge = {
+    # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
+    # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
+    # Pricing table for 2023: https://docs.google.com/spreadsheets/d/1_C0I0jE-X0e0vDcdKOFIWcnwpOqWC8RQ4YOCgXNnplY/edit?usp=sharing
+    spot_linux_4xlarge_bom = {
+      # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
+      name          = "spot-linux-4xlarge-bom"
+      capacity_type = "SPOT"
+      # Less than 5% eviction rate, cost below $0.08 per pod per hour
+      instance_types = [
+        "c5.4xlarge",
+        "c5a.4xlarge"
+      ]
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 90 # With 3 pods / machine, that can use ~30 Gb each at the same time (`emptyDir`)
+            volume_type           = "gp3"
+            iops                  = 3000 # Max included with gp3 without additional cost
+            throughput            = 125  # Max included with gp3 without additional cost
+            encrypted             = false
+            delete_on_termination = true
+          }
+        }
+      }
+      spot_instance_pools = 3 # Amount of different instance that we can use
+      min_size            = 0
+      max_size            = 50
+      desired_size        = 0
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      tags = {
+        "k8s.io/cluster-autoscaler/enabled"                     = true,
+        "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
+        "ci.jenkins.io/agents-density"                          = 3,
+      }
+      attach_cluster_primary_security_group = true
+      labels = {
+        "ci.jenkins.io/agents-density" = 3,
+        "ci.jenkins.io/bom"            = true,
+      }
+      taints = [
+        {
+          key    = "ci.jenkins.io/bom"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      ]
+    },
+    spot_linux_24xlarge_bom = {
       # 24xlarge: Instances supporting 23 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
       name          = "spot-linux-24xlarge"
       capacity_type = "SPOT"
@@ -150,21 +223,20 @@ module "eks" {
       desired_size        = 0
       kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
       tags = {
-        "k8s.io/cluster-autoscaler/enabled"               = true,
-        "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned",
+        "k8s.io/cluster-autoscaler/enabled"                     = true,
+        "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
       }
       attach_cluster_primary_security_group = true
-      labels         = {
-        "ci.jenkins.io/agents-density"                    = 23,
+      labels = {
+        "ci.jenkins.io/agents-density" = 23,
       }
-      taints         = [
+      taints = [
         {
           key    = "ci.jenkins.io/bom"
           value  = "true"
           effect = "NO_SCHEDULE"
         }
       ]
-      // TODO: taints + label (nodeselector): https://github.com/jenkins-infra/release/blob/41877fe2881e5b211550536ecb3d5b0123a08534/PodTemplates.d/package-windows.yaml#L39-L50
     },
   }
 
@@ -191,45 +263,94 @@ module "eks" {
   }
 }
 
-module "eks_iam_role_autoscaler" {
+module "cik8s_iam_role_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.17.0"
+  version                       = "5.19.0"
   create_role                   = true
-  role_name                     = "${local.autoscaler_account_name}-eks"
-  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
-  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+  role_name                     = "${local.autoscaler_account_name}-cik8s"
+  provider_url                  = replace(module.cik8s.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.cluster_autoscaler_cik8s.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks.cluster_name}"
+    associated_service = "eks/${module.cik8s.cluster_name}"
   }
 }
 
-module "eks_irsa_ebs" {
+module "cik8s_irsa_ebs" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.17.0"
+  version                       = "5.19.0"
   create_role                   = true
-  role_name                     = "${local.ebs_account_name}-eks"
-  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_name                     = "${local.ebs_account_name}-cik8s"
+  provider_url                  = replace(module.cik8s.cluster_oidc_issuer_url, "https://", "")
   role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
   tags = {
-    associated_service = "eks/${module.eks.cluster_name}"
+    associated_service = "eks/${module.cik8s.cluster_name}"
   }
 }
 
+
 # Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
-data "aws_iam_user" "eks_charter" {
-  user_name = "eks_charter"
+data "aws_iam_user" "cik8s_charter" {
+  user_name = "cik8s-charter"
 }
 
-# Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
-data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_name
+data "aws_eks_cluster" "cik8s" {
+  name = local.cik8s_cluster_name
 }
 
-# Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_name
+data "aws_eks_cluster_auth" "cik8s" {
+  name = local.cik8s_cluster_name
+}
+
+provider "kubernetes" {
+  alias                  = "cik8s"
+  host                   = data.aws_eks_cluster.cik8s.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cik8s.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cik8s.token
+}
+
+## No restriction on the resources: either managed outside terraform, or already scoped by conditions
+#tfsec:ignore:aws-iam-no-policy-wildcards
+data "aws_iam_policy_document" "cluster_autoscaler_cik8s" {
+  # Statements as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
+  statement {
+    sid    = "unrestricted"
+    effect = "Allow"
+
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeScalingActivities",
+      "autoscaling:DescribeTags",
+      "ec2:DescribeInstanceTypes",
+      "ec2:DescribeLaunchTemplateVersions"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "restricted"
+    effect = "Allow"
+
+    actions = [
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+      "ec2:DescribeImages",
+      "ec2:GetInstanceTypesFromInstanceRequirements",
+      "eks:DescribeNodegroup"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "cluster_autoscaler_cik8s" {
+  name_prefix = "cluster-autoscaler-cik8s"
+  description = "EKS cluster-autoscaler policy for cluster ${module.cik8s.cluster_name}"
+  policy      = data.aws_iam_policy_document.cluster_autoscaler_cik8s.json
 }

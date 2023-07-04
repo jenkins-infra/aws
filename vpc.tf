@@ -2,11 +2,18 @@ data "aws_availability_zones" "available" {}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.19.0"
+  version = "4.0.2"
 
-  name = "${local.cluster_name}-vpc"
+  name = "${local.cik8s_cluster_name}-vpc"
   cidr = "10.0.0.0/16"
-  azs  = data.aws_availability_zones.available.names
+
+  manage_default_network_acl    = false
+  map_public_ip_on_launch       = true
+  manage_default_route_table    = false
+  manage_default_security_group = false
+
+
+  azs = data.aws_availability_zones.available.names
   private_subnets = [
     # first for eks-cluster
     "10.0.16.0/20", # 10.0.16.1 -> 10.0.31.254

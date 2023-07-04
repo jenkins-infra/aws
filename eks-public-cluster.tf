@@ -14,7 +14,7 @@ module "eks-public" {
   version      = "19.15.3"
   cluster_name = local.public_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
-  cluster_version = "1.24"
+  cluster_version = "1.25"
   # Start is inclusive, end is exclusive (!): from index 3 to index 5 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 last private_subnets defined in vpc.tf for this cluster
   subnet_ids = slice(module.vpc.private_subnets, 3, 6)
@@ -55,20 +55,20 @@ module "eks-public" {
   cluster_addons = {
     # https://github.com/coredns/coredns/releases
     coredns = {
-      addon_version = "v1.9.3-eksbuild.2"
+      addon_version = "v1.9.3-eksbuild.5"
     }
     # Kube-proxy on an Amazon EKS cluster has the same compatibility and skew policy as Kubernetes
     # See https://kubernetes.io/releases/version-skew-policy/#kube-proxy
     kube-proxy = {
-      addon_version = "v1.24.9-eksbuild.1"
+      addon_version = "v1.25.11-eksbuild.1"
     }
     # https://github.com/aws/amazon-vpc-cni-k8s/releases
     vpc-cni = {
-      addon_version = "v1.12.2-eksbuild.1"
+      addon_version = "v1.13.2-eksbuild.1"
     }
     # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/CHANGELOG.md
     aws-ebs-csi-driver = {
-      addon_version            = "v1.16.0-eksbuild.1"
+      addon_version            = "v1.20.0-eksbuild.1"
       service_account_role_arn = module.eks-public_irsa_ebs.iam_role_arn
     }
   }

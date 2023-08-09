@@ -20,3 +20,10 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(module.eks-public.cluster_certificate_authority_data)
   token                  = data.aws_eks_cluster_auth.public-cluster.token
 }
+
+provider "kubernetes" {
+  alias                  = "cik8s"
+  host                   = data.aws_eks_cluster.cik8s.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cik8s.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cik8s.token
+}

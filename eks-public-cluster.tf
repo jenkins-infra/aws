@@ -220,9 +220,26 @@ module "eks-public_irsa_ebs" {
   }
 }
 
-# Reference the existing user for administrating the charts from github.com/jenkins-infra/kubernetes-management
+
+## Todo: check if still neded once jenkins-infra/helpdesk-3679 is closed
+# Reference the existing user for administrating the charts from jenkins-infra/kubernetes-management
 data "aws_iam_user" "eks_public_charter" {
   user_name = "eks-public-charter"
+}
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "eks_public_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.eks-public
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = module.eks-public.cluster_name
+  cluster_hostname           = module.eks-public.cluster_endpoint
+  cluster_ca_certificate_b64 = module.eks-public.cluster_certificate_authority_data
+}
+
+output "kubeconfig_eks_public" {
+  sensitive = true
+  value     = module.eks_public_admin_sa.kubeconfig
 }
 
 # Reference to allow configuration of the Terraform's kubernetes provider (in providers.tf)

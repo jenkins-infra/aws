@@ -291,10 +291,25 @@ module "cik8s_irsa_ebs" {
   }
 }
 
-
-# Reference the existing user for administrating the charts from github.com/jenkins-infra/charts
+## Todo: check if still neded once jenkins-infra/helpdesk-3679 is closed
+# Reference the existing user for administrating the charts from jenkins-infra/kubernetes-management
 data "aws_iam_user" "cik8s_charter" {
   user_name = "cik8s-charter"
+}
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "cik8s_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.cik8s
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = module.cik8s.cluster_name
+  cluster_hostname           = module.cik8s.cluster_endpoint
+  cluster_ca_certificate_b64 = module.cik8s.cluster_certificate_authority_data
+}
+
+output "kubeconfig_cik8s" {
+  sensitive = true
+  value     = module.cik8s_admin_sa.kubeconfig
 }
 
 data "aws_eks_cluster" "cik8s" {
@@ -303,13 +318,6 @@ data "aws_eks_cluster" "cik8s" {
 
 data "aws_eks_cluster_auth" "cik8s" {
   name = local.cik8s_cluster_name
-}
-
-provider "kubernetes" {
-  alias                  = "cik8s"
-  host                   = data.aws_eks_cluster.cik8s.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cik8s.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.cik8s.token
 }
 
 ## No restriction on the resources: either managed outside terraform, or already scoped by conditions

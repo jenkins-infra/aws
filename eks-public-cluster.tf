@@ -101,14 +101,7 @@ module "eks-public" {
 
   cluster_endpoint_public_access = true
 
-  aws_auth_users = concat(local.configmap_iam_admin_accounts, [
-    # User used by infra.ci.jenkins.io to administrate the charts deployements with github.com/jenkins-infra/kubernetes-management
-    {
-      userarn  = data.aws_iam_user.eks_public_charter.arn,
-      username = data.aws_iam_user.eks_public_charter.user_name,
-      groups   = ["system:masters"],
-    },
-  ])
+  aws_auth_users = local.configmap_iam_admin_accounts
 
   aws_auth_accounts = [
     local.aws_account_id,
@@ -220,12 +213,6 @@ module "eks-public_irsa_ebs" {
   }
 }
 
-
-## Todo: check if still neded once jenkins-infra/helpdesk-3679 is closed
-# Reference the existing user for administrating the charts from jenkins-infra/kubernetes-management
-data "aws_iam_user" "eks_public_charter" {
-  user_name = "eks-public-charter"
-}
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "eks_public_admin_sa" {
   providers = {

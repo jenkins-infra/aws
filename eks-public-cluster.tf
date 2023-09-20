@@ -236,8 +236,8 @@ data "aws_eks_cluster_auth" "public-cluster" {
 
 # Elastic IPs used for the Public Load Balancer (so that the addresses never change)
 resource "aws_eip" "lb_public" {
-  count = length(module.vpc.public_subnets)
-  vpc   = true
+  count  = length(module.vpc.public_subnets)
+  domain = "vpc"
 
   tags = {
     "Name" = "eks-public-loadbalancer-external-${count.index}"

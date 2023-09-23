@@ -13,7 +13,7 @@ resource "aws_iam_policy" "jenkins_ec2_agents" {
 }
 
 ## Allow wildcard for resource as the EC2 instance IDs are not known in advance
-#trivy:ignore:aws-iam-no-policy-wildcards
+#trivy:ignore:AVD-AWS-0342 trivy:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "jenkins_ec2_agents" {
   statement {
     sid    = "Stmt1312295543082"

@@ -109,7 +109,7 @@ module "eks-public" {
 }
 
 ## No restriction on the resources: either managed outside terraform, or already scoped by conditions
-#tfsec:ignore:aws-iam-no-policy-wildcards
+#trivy:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "cluster_autoscaler_public" {
   statement {
     sid    = "ec2"

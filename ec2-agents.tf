@@ -13,7 +13,7 @@ resource "aws_iam_policy" "jenkins_ec2_agents" {
 }
 
 ## Allow wildcard for resource as the EC2 instance IDs are not known in advance
-#tfsec:ignore:aws-iam-no-policy-wildcards
+#trivy:ignore:AVD-AWS-0342 trivy:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "jenkins_ec2_agents" {
   statement {
     sid    = "Stmt1312295543082"
@@ -75,7 +75,7 @@ resource "aws_key_pair" "ec2_agents" {
 
 
 ## Allow all agents to egress to the internet
-#tfsec:ignore:aws-vpc-no-public-egress-sgr
+#trivy:ignore:aws-vpc-no-public-egress-sgr
 resource "aws_security_group" "ec2_agents_security" {
   for_each = toset(local.aws_security_groups)
 

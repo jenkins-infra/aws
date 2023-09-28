@@ -309,7 +309,7 @@ data "aws_eks_cluster_auth" "cik8s" {
 }
 
 ## No restriction on the resources: either managed outside terraform, or already scoped by conditions
-#tfsec:ignore:aws-iam-no-policy-wildcards
+#trivy:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "cluster_autoscaler_cik8s" {
   # Statements as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
   statement {

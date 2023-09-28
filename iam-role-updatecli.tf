@@ -1,6 +1,6 @@
 ## Identity to allow updatecli to update AMIs and associated AWS resources
 ## No need to create a group for only 1 user
-#tfsec:ignore:no-user-attached-policies
+#trivy:ignore:no-user-attached-policies
 resource "aws_iam_user" "updatecli" {
   name = "updatecli"
 }
@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "updatecli" {
     ]
 
     ## Allow wildcard for resource as it's used to request AMIs with their IDs unknwon in Terraform
-    #tfsec:ignore:aws-iam-no-policy-wildcards
+    #trivy:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
   }
 }

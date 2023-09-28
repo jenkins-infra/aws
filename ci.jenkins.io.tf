@@ -3,7 +3,7 @@
 ##########################################################################################################################################################
 ## Section: S3 Bucket used for storing Artifact and stashes
 ## This bucket does not need logging, versionning nor encryption as all objects are public
-#tfsec:ignore:aws-s3-enable-versioning tfsec:ignore:aws-s3-enable-bucket-logging tfsec:ignore:aws-s3-encryption-customer-key tfsec:ignore:aws-s3-enable-bucket-encryption
+#trivy:ignore:AVD-AWS-0089 trivy:ignore:aws-s3-enable-versioning trivy:ignore:aws-s3-enable-bucket-logging trivy:ignore:aws-s3-encryption-customer-key trivy:ignore:aws-s3-enable-bucket-encryption
 resource "aws_s3_bucket" "ci_jenkins_io_artifacts" {
   bucket = "ci-jenkins-io-artifacts"
 

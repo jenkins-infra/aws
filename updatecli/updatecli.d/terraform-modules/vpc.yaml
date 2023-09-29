@@ -14,29 +14,22 @@ scms:
 
 sources:
   getLatestVersion:
-    kind: githubrelease
-    name: Retrieve the latest version
+    name: Get version from registry
+    kind: terraform/registry
     spec:
-      owner: "terraform-aws-modules"
-      repository: "terraform-aws-vpc"
-      token: "{{ requiredEnv .github.token }}"
-      username: "{{ .github.username }}"
-      versionfilter:
-        kind: semver
-    transformers:
-      - trimprefix: v
+      type: module
+      namespace: terraform-aws-modules
+      name: vpc
+      targetsystem: aws
 
 targets:
-  upgradeModuleVersion:
-    name: Update the Terraform module version of terraform-aws-modules/vpc/aws in vpc.tf
-    kind: file
+  upgradeForVpc:
+    name: "Update the Terraform module version of terraform-aws-modules/vpc/aws in cik8s-cluster.tf"
     sourceid: getLatestVersion
+    kind: hcl
     spec:
       file: vpc.tf
-      matchpattern: >-
-        source(.*)=(.*)"terraform-aws-modules/vpc/aws"(\r\n|\r|\n)(.*)version(.*)=(.*)
-      replacepattern: >-
-        source${1}=${2}"terraform-aws-modules/vpc/aws"${3}${4}version${5}= "{{ source `getLatestVersion` }}"
+      path: module.vpc.version
     scmid: default
 
 actions:

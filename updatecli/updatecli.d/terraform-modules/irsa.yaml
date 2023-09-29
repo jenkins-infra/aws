@@ -14,31 +14,31 @@ scms:
 
 sources:
   getLatestVersion:
-    kind: githubrelease
-    name: Retrieve the latest version
+    name: Get version from registry
+    kind: terraform/registry
     spec:
-      owner: "terraform-aws-modules"
-      repository: "terraform-aws-iam"
-      token: "{{ requiredEnv .github.token }}"
-      username: "{{ .github.username }}"
-      versionfilter:
-        kind: semver
-    transformers:
-      - trimprefix: v
+      type: module
+      namespace: terraform-aws-modules
+      # IAM is the "parent" module for submodule "iam-assumable-role-with-oidc"
+      name: iam
+      targetsystem: aws
 
 targets:
-  upgradeModuleVersion:
-    name: Update the Terraform module version of terraform-aws-modules/eks/aws
-    kind: file
+  upgradeForCik8s:
+    name: "Update the Terraform module version of terraform-aws-modules/iam/aws in cik8s-cluster.tf"
     sourceid: getLatestVersion
+    kind: hcl
     spec:
-      files:
-        - cik8s-cluster.tf
-        - eks-public-cluster.tf
-      matchpattern: >-
-        source(.*)=(.*)"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"(\r\n|\r|\n)(.*)version(.*)=(.*)
-      replacepattern: >-
-        source${1}=${2}"terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"${3}${4}version${5}= "{{ source "getLatestVersion" }}"
+      file: cik8s-cluster.tf
+      path: module.cik8s_iam_role_autoscaler.version
+    scmid: default
+  upgradeForEksPublic:
+    name: "Update the Terraform module version of terraform-aws-modules/iam/aws in cik8s-cluster.tf"
+    sourceid: getLatestVersion
+    kind: hcl
+    spec:
+      file: eks-public-cluster.tf
+      path: module.eks_iam_assumable_role_autoscaler_eks_public.version
     scmid: default
 
 actions:

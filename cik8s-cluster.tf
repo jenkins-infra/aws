@@ -258,7 +258,7 @@ module "cik8s" {
 
 module "cik8s_iam_role_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.30.0"
+  version                       = "5.30.1"
   create_role                   = true
   role_name                     = "${local.autoscaler_account_name}-cik8s"
   provider_url                  = replace(module.cik8s.cluster_oidc_issuer_url, "https://", "")

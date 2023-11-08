@@ -38,5 +38,5 @@ locals {
     },
   ]
   # AWS security groups related
-  aws_security_groups = ["infraci:infra.ci.jenkins.io:20.96.66.246/32"]
+  aws_security_groups = ["infraci:infra.ci.jenkins.io:20.22.6.81/32"]
 }

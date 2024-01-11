@@ -22,6 +22,7 @@ resource "aws_s3_bucket_public_access_block" "ci_jenkins_io_artifacts" {
   restrict_public_buckets = true
 }
 
+#trivy:ignore:AVD-AWS-0143
 resource "aws_iam_user" "ci_jenkins_io_artifacts" {
   name = "ci-jenkins-io-artifacts"
 

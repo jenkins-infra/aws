@@ -2,8 +2,12 @@ provider "aws" {
   region = var.region
   default_tags {
     tags = {
-      scope      = "terraform-managed"
-      repository = "jenkins-infra/aws"
+      scope           = "terraform-managed"
+      repository      = "jenkins-infra/aws"
+      "cb:user"       = "dduportal"
+      "cb:production" = "production"
+      "cb:owner"      = "Community-Team"
+      "cb-env-type"   = "external"
     }
   }
 }

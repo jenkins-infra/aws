@@ -11,12 +11,12 @@ locals {
   aws_account_id = "200564066411"
 
   common_tags = {
-    "scope"         = "terraform-managed"
-    "repository"    = "jenkins-infra/aws"
-    "cb:user"       = "dduportal"
-    "cb:production" = "production"
-    "cb:owner"      = "Community-Team"
-    "cb-env-type"   = "external"
+    "scope"          = "terraform-managed"
+    "repository"     = "jenkins-infra/aws"
+    "cb:user"        = "dduportal"
+    "cb:environment" = "production"
+    "cb:owner"       = "Community-Team"
+    "cb-env-type"    = "external"
   }
 
   ## Load public keypars from the reference file

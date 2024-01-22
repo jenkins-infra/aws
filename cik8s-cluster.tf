@@ -3,9 +3,9 @@ resource "aws_kms_key" "cik8s" {
   description         = "EKS Secret Encryption Key for the cluster ${local.cik8s_cluster_name}"
   enable_key_rotation = true
 
-  tags = {
+  tags = merge(local.common_tags, {
     associated_service = "eks/${local.cik8s_cluster_name}"
-  }
+  })
 }
 
 # EKS Cluster definition
@@ -50,13 +50,13 @@ module "cik8s" {
   # Do not use interpolated values from `local` in either keys and values of provided tags (or `cluster_tags)
   # To avoid having and implicit dependency to a resource not available when parsing the module (infamous errror `Error: Invalid for_each argument`)
   # Ref. same error as having a `depends_on` in https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337
-  tags = {
+  tags = merge(local.common_tags, {
     Environment = "jenkins-infra-${terraform.workspace}"
     GithubRepo  = "aws"
     GithubOrg   = "jenkins-infra"
 
     associated_service = "eks/cik8s"
-  }
+  })
 
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id
@@ -95,9 +95,9 @@ module "cik8s" {
       desired_size         = 1
       bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
       suspended_processes  = ["AZRebalance"]
-      tags = {
+      tags = merge(local.common_tags, {
         "k8s.io/cluster-autoscaler/enabled" = false # No autoscaling for these 2 machines
-      },
+      }),
       attach_cluster_primary_security_group = true
     },
     # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
@@ -130,11 +130,11 @@ module "cik8s" {
       max_size            = 50
       desired_size        = 0
       kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-      tags = {
+      tags = merge(local.common_tags, {
         "k8s.io/cluster-autoscaler/enabled"                     = true,
         "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
         "ci.jenkins.io/agents-density"                          = 3,
-      }
+      })
       attach_cluster_primary_security_group = true
       labels = {
         "ci.jenkins.io/agents-density" = 3,
@@ -170,11 +170,11 @@ module "cik8s" {
       max_size            = 50
       desired_size        = 0
       kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-      tags = {
+      tags = merge(local.common_tags, {
         "k8s.io/cluster-autoscaler/enabled"                     = true,
         "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
         "ci.jenkins.io/agents-density"                          = 3,
-      }
+      })
       attach_cluster_primary_security_group = true
       labels = {
         "ci.jenkins.io/agents-density" = 3,
@@ -215,10 +215,10 @@ module "cik8s" {
       max_size            = 15
       desired_size        = 0
       kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
-      tags = {
+      tags = merge(local.common_tags, {
         "k8s.io/cluster-autoscaler/enabled"                     = true,
         "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
-      }
+      })
       attach_cluster_primary_security_group = true
       labels = {
         "ci.jenkins.io/agents-density" = 23,
@@ -265,9 +265,9 @@ module "cik8s_iam_role_autoscaler" {
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler_cik8s.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
-  tags = {
+  tags = merge(local.common_tags, {
     associated_service = "eks/${module.cik8s.cluster_name}"
-  }
+  })
 }
 
 module "cik8s_irsa_ebs" {
@@ -279,9 +279,9 @@ module "cik8s_irsa_ebs" {
   role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
-  tags = {
+  tags = merge(local.common_tags, {
     associated_service = "eks/${module.cik8s.cluster_name}"
-  }
+  })
 }
 
 # Configure the jenkins-infra/kubernetes-management admin service account

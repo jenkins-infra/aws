@@ -3,9 +3,9 @@ resource "aws_kms_key" "eks_public" {
   description         = "EKS Secret Encryption Key for the cluster ${local.public_cluster_name}"
   enable_key_rotation = true
 
-  tags = {
+  tags = merge(local.common_tags, {
     associated_service = "eks/${local.public_cluster_name}"
-  }
+  })
 }
 
 # EKS Cluster definition
@@ -40,12 +40,12 @@ module "eks-public" {
   # Do not use interpolated values from `local` in either keys and values of provided tags (or `cluster_tags)
   # To avoid having and implicit dependency to a resource not available when parsing the module (infamous errror `Error: Invalid for_each argument`)
   # Ref. same error as having a `depends_on` in https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2337
-  tags = {
+  tags = merge(local.common_tags, {
     Environment        = "jenkins-infra-${terraform.workspace}"
     GithubRepo         = "aws"
     GithubOrg          = "jenkins-infra"
     associated_service = "eks/eks-public"
-  }
+  })
 
   # VPC is defined in vpc.tf
   vpc_id = module.vpc.vpc_id
@@ -78,10 +78,10 @@ module "eks-public" {
     capacity_type        = "ON_DEMAND"
     bootstrap_extra_args = "--kubelet-extra-args '--node-labels=node.kubernetes.io/lifecycle=normal'"
     suspended_processes  = ["AZRebalance"]
-    tags = {
+    tags = merge(local.common_tags, {
       "k8s.io/cluster-autoscaler/enabled"                      = true # Autoscaling enabled
       "k8s.io/cluster-autoscaler/${local.public_cluster_name}" = "owned",
-    },
+    }),
   }
 
   eks_managed_node_groups = {
@@ -179,9 +179,9 @@ module "eks_iam_assumable_role_autoscaler_eks_public" {
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler_public.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
 
-  tags = {
+  tags = merge(local.common_tags, {
     associated_service = "eks/${module.eks-public.cluster_name}"
-  }
+  })
 }
 
 module "eks-public_irsa_nlb" {
@@ -193,9 +193,9 @@ module "eks-public_irsa_nlb" {
   role_policy_arns              = [aws_iam_policy.cluster_nlb.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.nlb_account_namespace}:${local.nlb_account_name}"]
 
-  tags = {
+  tags = merge(local.common_tags, {
     associated_service = "eks/${module.eks-public.cluster_name}"
-  }
+  })
 }
 
 module "eks-public_irsa_ebs" {
@@ -208,9 +208,9 @@ module "eks-public_irsa_ebs" {
   oidc_fully_qualified_audiences = ["sts.amazonaws.com"]
   oidc_fully_qualified_subjects  = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
 
-  tags = {
+  tags = merge(local.common_tags, {
     associated_service = "eks/${module.eks-public.cluster_name}"
-  }
+  })
 }
 
 # Configure the jenkins-infra/kubernetes-management admin service account
@@ -239,9 +239,9 @@ resource "aws_eip" "lb_public" {
   count  = length(module.vpc.public_subnets)
   domain = "vpc"
 
-  tags = {
+  tags = merge(local.common_tags, {
     "Name" = "eks-public-loadbalancer-external-${count.index}"
-  }
+  })
 }
 
 # Custom Storage Classes to ensure that EBS PVC are bound to the correct availability zone

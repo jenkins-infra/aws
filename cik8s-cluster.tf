@@ -66,20 +66,20 @@ module "cik8s" {
   cluster_addons = {
     # https://github.com/coredns/coredns/releases
     coredns = {
-      addon_version = "v1.9.3-eksbuild.9"
+      addon_version = "v1.9.3-eksbuild.11"
     }
     # Kube-proxy on an Amazon EKS cluster has the same compatibility and skew policy as Kubernetes
     # See https://kubernetes.io/releases/version-skew-policy/#kube-proxy
     kube-proxy = {
-      addon_version = "v1.26.9-eksbuild.2"
+      addon_version = "v1.26.11-eksbuild.4"
     }
     # https://github.com/aws/amazon-vpc-cni-k8s/releases
     vpc-cni = {
-      addon_version = "v1.15.3-eksbuild.1"
+      addon_version = "v1.16.2-eksbuild.1"
     }
     # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/CHANGELOG.md
     aws-ebs-csi-driver = {
-      addon_version            = "v1.24.1-eksbuild.1"
+      addon_version            = "v1.27.0-eksbuild.1"
       service_account_role_arn = module.cik8s_irsa_ebs.iam_role_arn
     }
   }

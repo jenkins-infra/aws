@@ -11,7 +11,7 @@ resource "aws_kms_key" "cik8s" {
 # EKS Cluster definition
 module "cik8s" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "19.21.0"
+  version      = "20.0.1"
   cluster_name = local.cik8s_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
   cluster_version = "1.26"

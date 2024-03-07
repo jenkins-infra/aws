@@ -14,7 +14,7 @@ module "cik8s" {
   version      = "19.21.0"
   cluster_name = local.cik8s_cluster_name
   # Kubernetes version in format '<MINOR>.<MINOR>', as per https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
-  cluster_version = "1.26"
+  cluster_version = "1.27"
   # Start is inclusive, end is exclusive (!): from index 0 to index 2 (https://www.terraform.io/language/functions/slice)
   # We're using the 3 first private_subnets defined in vpc.tf for this cluster
   subnet_ids = slice(module.vpc.private_subnets, 0, 3)
@@ -66,20 +66,20 @@ module "cik8s" {
   cluster_addons = {
     # https://github.com/coredns/coredns/releases
     coredns = {
-      addon_version = "v1.9.3-eksbuild.11"
+      addon_version = "v1.10.1-eksbuild.7"
     }
     # Kube-proxy on an Amazon EKS cluster has the same compatibility and skew policy as Kubernetes
     # See https://kubernetes.io/releases/version-skew-policy/#kube-proxy
     kube-proxy = {
-      addon_version = "v1.26.11-eksbuild.4"
+      addon_version = "v1.27.10-eksbuild.2"
     }
     # https://github.com/aws/amazon-vpc-cni-k8s/releases
     vpc-cni = {
-      addon_version = "v1.16.2-eksbuild.1"
+      addon_version = "v1.16.4-eksbuild.2"
     }
     # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/CHANGELOG.md
     aws-ebs-csi-driver = {
-      addon_version            = "v1.27.0-eksbuild.1"
+      addon_version            = "v1.28.0-eksbuild.1"
       service_account_role_arn = module.cik8s_irsa_ebs.iam_role_arn
     }
   }

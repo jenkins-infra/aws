@@ -143,6 +143,57 @@ module "cik8s" {
     # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
     # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
     # Pricing table for 2023: https://docs.google.com/spreadsheets/d/1_C0I0jE-X0e0vDcdKOFIWcnwpOqWC8RQ4YOCgXNnplY/edit?usp=sharing
+    spot_linux_arm64_4xlarge = {
+      # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/16 Gb) each with 1 vCPU/1Gb margin
+      name          = "spot-linux-arm64-4xlarge"
+      capacity_type = "SPOT"
+      # Less than 5% eviction rate, cost below $0.07 per pod per hour
+      instance_types = [
+        "m7g.4xlarge" # 16 vCPUs/64 Gb RAM
+      ]
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 90 # With 3 pods / machine, that can use ~30 Gb each at the same time (`emptyDir`)
+            volume_type           = "gp3"
+            iops                  = 3000 # Max included with gp3 without additional cost
+            throughput            = 125  # Max included with gp3 without additional cost
+            encrypted             = false
+            delete_on_termination = true
+          }
+        }
+      }
+      spot_instance_pools = 3 # Amount of different instance that we can use
+      min_size            = 0
+      max_size            = 50
+      desired_size        = 0
+      kubelet_extra_args  = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      tags = merge(local.common_tags, {
+        "k8s.io/cluster-autoscaler/enabled"                     = true,
+        "k8s.io/cluster-autoscaler/${local.cik8s_cluster_name}" = "owned",
+        "ci.jenkins.io/agents-density"                          = 3,
+      })
+      attach_cluster_primary_security_group = true
+      labels = {
+        "ci.jenkins.io/agents-density" = 3,
+      }
+      taints = {
+        arch = {
+          key    = "kubernetes.io/arch"
+          value  = "arm64"
+          effect = "NO_SCHEDULE"
+        },
+        dedicated = {
+          key    = "jenkins"
+          value  = "ci.jenkins.io"
+          effect = "NO_SCHEDULE"
+        }
+      }
+    },
+    # This list of worker pool is aimed at mixed spot instances type, to ensure that we always get the most available (e.g. the cheaper) spot size
+    # as per https://aws.amazon.com/blogs/compute/cost-optimization-and-resilience-eks-with-spot-instances/
+    # Pricing table for 2023: https://docs.google.com/spreadsheets/d/1_C0I0jE-X0e0vDcdKOFIWcnwpOqWC8RQ4YOCgXNnplY/edit?usp=sharing
     spot_linux_4xlarge_bom = {
       # 4xlarge: Instances supporting 3 pods (limited to 4 vCPUs/8 Gb) each with 1 vCPU/1Gb margin
       name          = "spot-linux-4xlarge-bom"

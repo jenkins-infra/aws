@@ -14,10 +14,11 @@ parallel(
       ],
     )
   },
-  'updatecli': {
-    updatecli(action: 'diff')
-    if (env.BRANCH_IS_PRIMARY) {
-      updatecli(action: 'apply', cronTriggerExpression: '@daily')
-    }
-  },
+  // TODO:; split into  2 jobs
+  // 'updatecli': {
+  //   updatecli(action: 'diff')
+  //   if (env.BRANCH_IS_PRIMARY) {
+  //     updatecli(action: 'apply', cronTriggerExpression: '@daily')
+  //   }
+  // },
 )

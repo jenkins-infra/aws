@@ -79,8 +79,7 @@ module "cik8s" {
     }
     # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/CHANGELOG.md
     aws-ebs-csi-driver = {
-      addon_version            = "v1.28.0-eksbuild.1"
-      service_account_role_arn = module.cik8s_irsa_ebs.iam_role_arn
+      addon_version = "v1.28.0-eksbuild.1"
     }
   }
 
@@ -256,97 +255,6 @@ module "cik8s" {
   }
 }
 
-module "cik8s_iam_role_autoscaler" {
-  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.39.1"
-  create_role                   = true
-  role_name                     = "${local.autoscaler_account_name}-cik8s"
-  provider_url                  = replace(module.cik8s.cluster_oidc_issuer_url, "https://", "")
-  role_policy_arns              = [aws_iam_policy.cluster_autoscaler_cik8s.arn]
-  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.autoscaler_account_namespace}:${local.autoscaler_account_name}"]
-
-  tags = merge(local.common_tags, {
-    associated_service = "eks/${module.cik8s.cluster_name}"
-  })
-}
-
-module "cik8s_irsa_ebs" {
-  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.30.0"
-  create_role                   = true
-  role_name                     = "${local.ebs_account_name}-cik8s"
-  provider_url                  = replace(module.cik8s.cluster_oidc_issuer_url, "https://", "")
-  role_policy_arns              = [aws_iam_policy.ebs_csi.arn]
-  oidc_fully_qualified_subjects = ["system:serviceaccount:${local.ebs_account_namespace}:${local.ebs_account_name}"]
-
-  tags = merge(local.common_tags, {
-    associated_service = "eks/${module.cik8s.cluster_name}"
-  })
-}
-
-# Configure the jenkins-infra/kubernetes-management admin service account
-module "cik8s_admin_sa" {
-  providers = {
-    kubernetes = kubernetes.cik8s
-  }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-  cluster_name               = module.cik8s.cluster_name
-  cluster_hostname           = module.cik8s.cluster_endpoint
-  cluster_ca_certificate_b64 = module.cik8s.cluster_certificate_authority_data
-}
-
-output "kubeconfig_cik8s" {
-  sensitive = true
-  value     = module.cik8s_admin_sa.kubeconfig
-}
-
-data "aws_eks_cluster" "cik8s" {
-  name = local.cik8s_cluster_name
-}
-
 data "aws_eks_cluster_auth" "cik8s" {
   name = local.cik8s_cluster_name
-}
-
-## No restriction on the resources: either managed outside terraform, or already scoped by conditions
-#trivy:ignore:aws-iam-no-policy-wildcards
-data "aws_iam_policy_document" "cluster_autoscaler_cik8s" {
-  # Statements as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
-  statement {
-    sid    = "unrestricted"
-    effect = "Allow"
-
-    actions = [
-      "autoscaling:DescribeAutoScalingGroups",
-      "autoscaling:DescribeAutoScalingInstances",
-      "autoscaling:DescribeLaunchConfigurations",
-      "autoscaling:DescribeScalingActivities",
-      "autoscaling:DescribeTags",
-      "ec2:DescribeInstanceTypes",
-      "ec2:DescribeLaunchTemplateVersions"
-    ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "restricted"
-    effect = "Allow"
-
-    actions = [
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "ec2:DescribeImages",
-      "ec2:GetInstanceTypesFromInstanceRequirements",
-      "eks:DescribeNodegroup"
-    ]
-
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "cluster_autoscaler_cik8s" {
-  name_prefix = "cluster-autoscaler-cik8s"
-  description = "EKS cluster-autoscaler policy for cluster ${module.cik8s.cluster_name}"
-  policy      = data.aws_iam_policy_document.cluster_autoscaler_cik8s.json
 }

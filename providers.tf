@@ -20,7 +20,7 @@ provider "kubernetes" {
 
 provider "kubernetes" {
   alias                  = "cik8s"
-  host                   = data.aws_eks_cluster.cik8s.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cik8s.certificate_authority[0].data)
+  host                   = module.cik8s.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.cik8s.cluster_certificate_authority_data)
   token                  = data.aws_eks_cluster_auth.cik8s.token
 }

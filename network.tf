@@ -37,7 +37,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_admins" {
 resource "aws_vpc_security_group_ingress_rule" "allow_http_internet" {
   description       = "Allow HTTP from everywhere (public Internet)"
   security_group_id = aws_security_group.unrestricted_http.id
-  cidr_ipv4         = "0.0.0.0/32"
+  cidr_ipv4         = "0.0.0.0/0"
   from_port         = 80
   ip_protocol       = "tcp"
   to_port           = 80
@@ -46,7 +46,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http_internet" {
 resource "aws_vpc_security_group_ingress_rule" "allow_https_internet" {
   description       = "Allow HTTP from everywhere (public Internet)"
   security_group_id = aws_security_group.unrestricted_http.id
-  cidr_ipv4         = "0.0.0.0/32"
+  cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
   ip_protocol       = "tcp"
   to_port           = 443

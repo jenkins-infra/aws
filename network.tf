@@ -34,6 +34,8 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_admins" {
   to_port           = 22
 }
 
+## We WANT inbound from everywhere
+#trivy:ignore:avd-aws-0107
 resource "aws_vpc_security_group_ingress_rule" "allow_http_internet" {
   description       = "Allow HTTP from everywhere (public Internet)"
   security_group_id = aws_security_group.unrestricted_http.id
@@ -43,6 +45,8 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http_internet" {
   to_port           = 80
 }
 
+## We WANT inbound from everywhere
+#trivy:ignore:avd-aws-0107
 resource "aws_vpc_security_group_ingress_rule" "allow_https_internet" {
   description       = "Allow HTTP from everywhere (public Internet)"
   security_group_id = aws_security_group.unrestricted_http.id

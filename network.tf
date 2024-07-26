@@ -36,7 +36,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_admins" {
 
 ## We WANT inbound from everywhere
 #trivy:ignore:avd-aws-0107
-resource "aws_vpc_security_group_ingress_rule" "allow_http_internet" {
+resource "aws_vpc_security_group_ingress_rule" "allow_http_from_internet" {
   description       = "Allow HTTP from everywhere (public Internet)"
   security_group_id = aws_security_group.unrestricted_http.id
   cidr_ipv4         = "0.0.0.0/0"
@@ -47,11 +47,35 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http_internet" {
 
 ## We WANT inbound from everywhere
 #trivy:ignore:avd-aws-0107
-resource "aws_vpc_security_group_ingress_rule" "allow_https_internet" {
+resource "aws_vpc_security_group_ingress_rule" "allow_https_from_internet" {
   description       = "Allow HTTP from everywhere (public Internet)"
   security_group_id = aws_security_group.unrestricted_http.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
   ip_protocol       = "tcp"
   to_port           = 443
+}
+
+## We WANT egress to internet (APT at least, but also outbound azcopy on some machines)
+#trivy:ignore:avd-aws-0104
+resource "aws_vpc_security_group_egress_rule" "allow_http_to_internet" {
+  description       = "Allow HTTP to everywhere (public Internet)"
+  security_group_id = aws_security_group.unrestricted_http.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 80
+  ip_protocol = "tcp"
+  to_port     = 80
+}
+
+## We WANT egress to internet (APT at least, but also outbound azcopy on some machines)
+#trivy:ignore:avd-aws-0104
+resource "aws_vpc_security_group_egress_rule" "allow_https_to_internet" {
+  description       = "Allow HTTPS to everywhere (public Internet)"
+  security_group_id = aws_security_group.unrestricted_http.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 443
+  ip_protocol = "tcp"
+  to_port     = 443
 }

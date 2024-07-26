@@ -29,13 +29,13 @@ resource "aws_security_group" "pkg" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_outbound_ssh" {
-  for_each = [
-    for ip in toset(flatten(concat(
+  for_each = toset([
+    for ip in flatten(concat(
       module.jenkins_infra_shared_data.outbound_ips["archives.jenkins.io"],        # Sync to archives.jenkins.io with SSH/Rsync
       module.jenkins_infra_shared_data.external_service_ips["ftp-osl.osuosl.org"], # Sync to OSUOSL
-    ))) : ip
+    )) : ip
     if can(cidrnetmask("${ip}/32"))
-  ]
+  ])
 
   description       = "Allow outbound SSH for sync"
   security_group_id = aws_security_group.pkg.id
@@ -46,13 +46,13 @@ resource "aws_vpc_security_group_egress_rule" "allow_outbound_ssh" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_outbound_rsync" {
-  for_each = [
-    for ip in toset(flatten(concat(
+  for_each = toset([
+    for ip in flatten(concat(
       module.jenkins_infra_shared_data.outbound_ips["archives.jenkins.io"],        # Sync to archives.jenkins.io with SSH/Rsync
       module.jenkins_infra_shared_data.external_service_ips["ftp-osl.osuosl.org"], # Sync to OSUOSL
-    ))) : ip
+    )) : ip
     if can(cidrnetmask("${ip}/32"))
-  ]
+  ])
 
   description       = "Allow outbound SSH for sync"
   security_group_id = aws_security_group.pkg.id

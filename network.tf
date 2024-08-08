@@ -83,3 +83,15 @@ resource "aws_vpc_security_group_egress_rule" "allow_https_to_internet" {
   ip_protocol = "tcp"
   to_port     = 443
 }
+
+resource "aws_vpc_security_group_egress_rule" "allow_puppet_to_puppetmaster" {
+  description       = "Allow Puppet protocol to the Puppet master"
+  security_group_id = aws_security_group.unrestricted_http.id
+
+  # Ref. https://github.com/jenkins-infra/azure/blob/main/puppet.jenkins.io.tf
+  # TODO: automate retrieval of this IP with updatecli
+  cidr_ipv4   = "20.12.27.65/32"
+  from_port   = 8140
+  ip_protocol = "tcp"
+  to_port     = 8140
+}

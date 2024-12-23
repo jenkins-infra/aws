@@ -1,24 +1,18 @@
-parallel(
-  failFast: false,
-  'terraform': {
-    terraform(
-      stagingCredentials: [
-        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'staging-terraform-aws-access-key'),
-        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'staging-terraform-aws-secret-key'),
-        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'staging-terraform-aws-backend-config'),
-      ],
-      productionCredentials: [
-        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),
-        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
-        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
-      ],
-    )
-  },
-  // TODO:; split into  2 jobs
-  // 'updatecli': {
-  //   updatecli(action: 'diff')
-  //   if (env.BRANCH_IS_PRIMARY) {
-  //     updatecli(action: 'apply', cronTriggerExpression: '@daily')
-  //   }
-  // },
+if (env.BRANCH_IS_PRIMARY) {
+    // Only trigger a daily check on the principal branch
+    properties([pipelineTriggers([cron('@daily')])])
+}
+
+terraform(
+  stagingCredentials: [
+    string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'staging-terraform-aws-access-key'),
+    string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'staging-terraform-aws-secret-key'),
+    file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'staging-terraform-aws-backend-config'),
+  ],
+  productionCredentials: [
+    string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),
+    string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
+    file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
+  ],
+  // publishReports: ['jenkins-infra-data-reports/aws.json'],
 )

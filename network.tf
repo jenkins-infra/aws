@@ -24,8 +24,11 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_admins" {
       module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],              # permanent agent of update_center2
       module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"],  # ephemeral agents for crawler
       module.jenkins_infra_shared_data.outbound_ips["privatek8s.jenkins.io"],              # VPN VM
-      module.jenkins_infra_shared_data.outbound_ips["infracijenkinsioagents1.jenkins.io"], # Terraform management and Docker-packaging build
+      # TODO: track with updatecli
+      ["20.122.14.108", "20.186.70.154"],                                                  # Outbound IPv4 of the infracijioagents-1-sponsorship NAT gateway (infra.ci agents)
       module.jenkins_infra_shared_data.outbound_ips["private.vpn.jenkins.io"],             # connections routed through the VPN
+      # TODO: track with updatecli
+      ["172.200.139.164", "128.24.89.148"],                                                # Outbound IPv4 of the privatek8s-sponsorship.jenkins.io NAT gateway (release.ci agents, controller and infra.ci controller)
     )) : ip
     if can(cidrnetmask("${ip}/32"))
   ])

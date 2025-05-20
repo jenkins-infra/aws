@@ -86,6 +86,18 @@ resource "aws_vpc_security_group_egress_rule" "allow_https_to_internet" {
   to_port     = 443
 }
 
+## We WANT egress to internet (rsync cases)
+#trivy:ignore:avd-aws-0104
+resource "aws_vpc_security_group_egress_rule" "allow_rsync_to_internet" {
+  description       = "Allow rsync to everywhere (public Internet)"
+  security_group_id = aws_security_group.unrestricted_http.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 873
+  ip_protocol = "tcp"
+  to_port     = 873
+}
+
 resource "aws_vpc_security_group_egress_rule" "allow_puppet_to_puppetmaster" {
   description       = "Allow Puppet protocol to the Puppet master"
   security_group_id = aws_security_group.unrestricted_http.id

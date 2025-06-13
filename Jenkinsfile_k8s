@@ -14,5 +14,5 @@ terraform(
     string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
     file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
   ],
-  // publishReports: ['jenkins-infra-data-reports/aws.json'],
+  publishReports: ['jenkins-infra-data-reports/aws.json'],
 )

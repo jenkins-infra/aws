@@ -1,7 +1,7 @@
 resource "local_file" "jenkins_infra_data_report" {
   content = jsonencode({
     "census.jenkins.io" = {
-      "inbound_ips" = {
+      "service_ips" = {
         "ipv4" = data.aws_instance.census_jenkins_io.public_ip,
       }
       "outbound_ips" = {
@@ -9,7 +9,7 @@ resource "local_file" "jenkins_infra_data_report" {
       }
     },
     "usage.jenkins.io" = {
-      "inbound_ips" = {
+      "service_ips" = {
         "ipv4" = data.aws_instance.usage_jenkins_io.public_ip,
       }
       "outbound_ips" = {
@@ -17,7 +17,7 @@ resource "local_file" "jenkins_infra_data_report" {
       }
     },
     "pkg.origin.jenkins.io" = {
-      "inbound_ips" = {
+      "service_ips" = {
         "ipv4" = data.aws_instance.pkg_origin_jenkins_io.public_ip,
       }
       "outbound_ips" = {

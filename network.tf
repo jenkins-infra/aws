@@ -21,13 +21,9 @@ resource "aws_security_group" "unrestricted_http" {
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_admins" {
   for_each = toset([
     for ip in flatten(concat(
-      module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],             # permanent agent of update_center2
-      module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"], # ephemeral agents for crawler
-      # TODO: track with updatecli
-      ["172.210.200.59", "20.10.193.4"],                                      # Outbound IPv4 of the infracijioagents-1-sponsorship NAT gateway (infra.ci agents)
-      module.jenkins_infra_shared_data.outbound_ips["private.vpn.jenkins.io"], # connections routed through the VPN
-      # TODO: track with updatecli
-      ["20.57.120.46", "52.179.141.53"], # Outbound IPv4 of the privatek8s cluster NAT gateway (release.ci agents, controller and infra.ci controller)
+      split(" ", local.outbound_ips_trusted_ci_jenkins_io),  # trusted.ci.jenkins.io (controller and all agents) for rsync data transfer
+      split(" ", local.outbound_ips_infra_ci_jenkins_io),    # infra.ci.jenkins.io (controller and all agents) for SSH management
+      split(" ", local.outbound_ips_private_vpn_jenkins_io), # connections routed through the VPN
     )) : ip
     if can(cidrnetmask("${ip}/32"))
   ])

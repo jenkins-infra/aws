@@ -105,3 +105,24 @@ resource "aws_vpc_security_group_egress_rule" "allow_puppet_to_puppetmaster" {
   ip_protocol = "tcp"
   to_port     = 8140
 }
+
+# ----------- Temporary to allow usage migration ----------
+# todo: to remove when usage is migrated from AWS to DigitalOcean
+
+resource "aws_security_group" "tmp_usage_ssh_access" {
+  name        = "tmp-usage-ssh-access"
+  description = "Allow egress SSH only from usage legacy to usage.do new machine"
+  vpc_id      = data.aws_vpc.default.id
+
+  tags = local.common_tags
+}
+
+resource "aws_vpc_security_group_egress_rule" "tmp_allow_usage_to_usage-do" {
+  description       = "Allow ssh protocol to the usage DigitalOcean new machine"
+  security_group_id = aws_security_group.tmp_usage_ssh_access.id
+
+  cidr_ipv4   = "138.197.183.107/32"
+  from_port   = 22
+  ip_protocol = "tcp"
+  to_port     = 22
+}

@@ -121,7 +121,7 @@ resource "aws_vpc_security_group_egress_rule" "tmp_allow_usage_to_usage-do" {
   description       = "Allow ssh protocol to the usage DigitalOcean new machine"
   security_group_id = aws_security_group.tmp_usage_ssh_access.id
 
-  cidr_ipv4   = "138.197.183.107/32"
+  cidr_ipv4   = "64.227.123.95/32"
   from_port   = 22
   ip_protocol = "tcp"
   to_port     = 22

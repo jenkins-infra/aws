@@ -24,11 +24,30 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_admins" {
       split(" ", local.outbound_ips_trusted_ci_jenkins_io),  # trusted.ci.jenkins.io (controller and all agents) for rsync data transfer
       split(" ", local.outbound_ips_infra_ci_jenkins_io),    # infra.ci.jenkins.io (controller and all agents) for SSH management
       split(" ", local.outbound_ips_private_vpn_jenkins_io), # connections routed through the VPN
+      # TODO: remove once migrated
+      split(" ", local.outbound_ips_census_do_jenkins_io), # connections from the new census VM
     )) : ip
     if can(cidrnetmask("${ip}/32"))
   ])
 
   description       = "Allow admin (or platform) IPv4 for inbound SSH"
+  security_group_id = aws_security_group.restricted_ssh.id
+  cidr_ipv4         = "${each.value}/32"
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+# TODO: remove once migrated
+resource "aws_vpc_security_group_egress_rule" "allow_ssh_to_digitalocean_vms" {
+  for_each = toset([
+    for ip in flatten(concat(
+      split(" ", local.outbound_ips_census_do_jenkins_io), # connections to the new census VM
+    )) : ip
+    if can(cidrnetmask("${ip}/32"))
+  ])
+
+  description       = "Allow outbound SSH to DigitalOcean VMs"
   security_group_id = aws_security_group.restricted_ssh.id
   cidr_ipv4         = "${each.value}/32"
   from_port         = 22

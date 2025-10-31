@@ -20,4 +20,6 @@ locals {
   inbound_ips_archives_jenkins_io = "46.101.121.132 2a03:b0c0:3:d0::9bc:d001"
   # TODO: track with updatecli
   inbound_ips_ftp_osl_osuosl_org = "140.211.166.134 2605:bc80:3010::134"
+  # TODO: remove when migration is finished
+  outbound_ips_census_do_jenkins_io = "64.226.127.59"
 }
